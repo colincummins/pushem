@@ -20,6 +20,7 @@ def main():
                 pass
 
         board.draw_grid(WIN)
+        board.draw_pieces(WIN)
         pygame.display.update()
 
 
