@@ -9,9 +9,6 @@ COLS = 5
 BLACK = HOLE_COLOR = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
-P1_COLOR = (255, 248, 220) # Cornsilk
-P2_COLOR = (160, 82, 45) # Sienna
+P1_COLOR = (245, 222, 179)
+P2_COLOR = (160, 82, 45)
 
-# Piece dimensions are based on padding from square size
-PLAYER_PADDING = 15
-HOLE_PADDING = 5

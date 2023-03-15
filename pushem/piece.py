@@ -1,5 +1,9 @@
 import pygame
-from .constants import P1_COLOR, P2_COLOR, HOLE_COLOR, ROWS, COLS, SQUARE_SIZE, PLAYER_PADDING, HOLE_PADDING
+from .constants import SQUARE_SIZE, HOLE_COLOR, BLACK
+
+PLAYER_SIZE = 100
+HOLE_SIZE = 140
+PLAYER_BORDER = 5
 
 
 class Piece:
@@ -9,16 +13,22 @@ class Piece:
         self.col = col
         self.x = 0
         self.y = 0
-        self.calc_pos
+        self.calc_pos()
 
     def calc_pos(self):
         # Gets center of piece.
-        self.x = SQUARE_SIZE // 2 + COLS * SQUARE_SIZE
-        self.y = SQUARE_SIZE // 2 + ROWS * SQUARE_SIZE
+        self.x = SQUARE_SIZE // 2 + self.col * SQUARE_SIZE
+        self.y = SQUARE_SIZE // 2 + self.row * SQUARE_SIZE
 
+
+class PlayerPiece(Piece):
     def draw(self, win):
-        if self.color in (P1_COLOR, P2_COLOR):
-            pygame.draw.rect(win, self.color, (self.x - (SQUARE_SIZE // 2 - PLAYER_PADDING)),
-                             self.y - (SQUARE_SIZE // 2 - PLAYER_PADDING))
-        else:
-            pass
+        pygame.draw.rect(win, BLACK, (self.x - PLAYER_SIZE // 2, self.y - PLAYER_SIZE // 2, PLAYER_SIZE, PLAYER_SIZE))
+        pygame.draw.rect(win, self.color, (
+        self.x - PLAYER_SIZE // 2 + PLAYER_BORDER, self.y - PLAYER_SIZE // 2 + PLAYER_BORDER,
+        PLAYER_SIZE - 2 * PLAYER_BORDER, PLAYER_SIZE - 2 * PLAYER_BORDER))
+
+
+class HolePiece(Piece):
+    def draw(self, win):
+        pygame.draw.circle(win, HOLE_COLOR, (self.x, self.y), HOLE_SIZE // 2)
