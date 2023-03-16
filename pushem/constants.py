@@ -1,9 +1,9 @@
 # Board dimensions
-WIDTH, HEIGHT = 800, 800
-SQUARE_SIZE = 160
+WIDTH, HEIGHT = 700, 700
+SQUARE_SIZE = 100
 SQUARE_PAD = 5
-ROWS = 5
-COLS = 5
+ROWS = 7
+COLS = 7
 
 # Colors - RGB
 BLACK = HOLE_COLOR = (0, 0, 0)

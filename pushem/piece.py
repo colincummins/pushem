@@ -1,8 +1,8 @@
 import pygame
 from .constants import SQUARE_SIZE, HOLE_COLOR, BLACK
 
-PLAYER_SIZE = 100
-HOLE_SIZE = 140
+PLAYER_SIZE = 70
+HOLE_SIZE = 90
 PLAYER_BORDER = 5
 
 

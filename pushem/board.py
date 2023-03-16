@@ -8,14 +8,14 @@ class Board:
         self.selected_piece = None
         self.square = pygame.Rect(0, 0, SQUARE_SIZE - SQUARE_PAD, SQUARE_SIZE - SQUARE_PAD)
         self.board = [[None] * COLS for j in range(ROWS)]
-        for col in range(COLS):
-            self.board[0][col] = PlayerPiece(P1_COLOR, 0, col)
-            self.board[ROWS - 1][col] = PlayerPiece(P2_COLOR, ROWS - 1, col)
-            self.board[2][2] = HolePiece(HOLE_COLOR, 2, 2)
+        for col in range(1, COLS - 1):
+            self.board[1][col] = PlayerPiece(P1_COLOR, 1, col)
+            self.board[ROWS - 2][col] = PlayerPiece(P2_COLOR, ROWS - 2, col)
+            self.board[3][3] = HolePiece(HOLE_COLOR, 3, 3)
 
     def draw_grid(self, win):
         win.fill(GRAY)
-        for row, col in product(range(ROWS), range(COLS)):
+        for row, col in product(range(1, ROWS - 1), range(1, COLS - 1)):
             self.square.center = ((SQUARE_SIZE // 2) + row * SQUARE_SIZE, (SQUARE_SIZE // 2) + col * SQUARE_SIZE)
             pygame.draw.rect(win, WHITE, self.square)
 
