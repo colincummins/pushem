@@ -7,6 +7,7 @@ pygame.display.set_caption("PushEm")
 
 
 def main():
+    """Main logic/rendering loop"""
     run = True
     clock = pygame.time.Clock()
     board = Board()

@@ -14,12 +14,22 @@ class Board:
             self.board[3][3] = HolePiece(HOLE_COLOR, 3, 3)
 
     def draw_grid(self, win):
+        """
+        Draws grid onto surface 'win'
+        :param win: Write grid onto this surface
+        :return:
+        """
         win.fill(GRAY)
         for row, col in product(range(1, ROWS - 1), range(1, COLS - 1)):
             self.square.center = ((SQUARE_SIZE // 2) + row * SQUARE_SIZE, (SQUARE_SIZE // 2) + col * SQUARE_SIZE)
             pygame.draw.rect(win, WHITE, self.square)
 
     def draw_pieces(self, win):
+        """
+        Draw all pieces onto surface 'win'
+        :param win: Target surface
+        :return:
+        """
         for row in range(ROWS):
             for col in range(COLS):
                 if self.board[row][col] is not None:

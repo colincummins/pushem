@@ -6,9 +6,9 @@ ROWS = 7
 COLS = 7
 
 # Colors - RGB
-BLACK = HOLE_COLOR = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 P1_COLOR = (245, 222, 179)
 P2_COLOR = (160, 82, 45)
+BLACK = HOLE_COLOR = (0, 0, 0)
 
