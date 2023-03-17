@@ -7,11 +7,15 @@ pygame.display.set_caption("PushEm")
 
 
 def main():
-    """Main logic/rendering loop"""
+    """
+    Sets up new game, provides user input to same.
+    :return:
+    """
     run = True
     clock = pygame.time.Clock()
     board = Board()
 
+    """Main logic/rendering loop"""
     while run:
         clock.tick(FPS)
         for event in pygame.event.get():

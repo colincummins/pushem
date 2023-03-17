@@ -32,6 +32,13 @@ class Piece:
         self.x = SQUARE_SIZE // 2 + self.col * SQUARE_SIZE
         self.y = SQUARE_SIZE // 2 + self.row * SQUARE_SIZE
 
+    def get_color(self):
+        """
+        Getter method
+        :return: Color of current piece (doubles as player type) (int)
+        """
+        return self.color
+
 
 class PlayerPiece(Piece):
     """
