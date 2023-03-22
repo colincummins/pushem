@@ -58,7 +58,7 @@ class Board:
         """
         return row < 1 or row > ROWS - 2 or col < 1 or col > COLS - 2
 
-    def make_move(self, current_row:int, current_col:int, target_row:int, target_col:int, pieces_moved = None) -> [pushem.piece.Piece]:
+    def try_move(self, current_row:int, current_col:int, target_row:int, target_col:int, pieces_moved = None) -> [pushem.piece.Piece]:
         """
         Try to move piece from current to target.
         :param pieces_moved: List of pieces affected by this move so far
@@ -66,31 +66,42 @@ class Board:
         :param current_col: Col of moving piece on self.board
         :param target_row: Row of target piece on self.board
         :param target_col: Col of target piece on self.board
-        :return: List of pieces moved, starting with current piece
+        :return: List of pieces moved, starting with initiating piece and ending with final destination square [(int,int)]
         """
 
         if pieces_moved is None:
             pieces_moved = []
 
-        # Test for invalid move - Cannot push Hole off of board
-        if self.board[current_row][current_col].get_color() == HOLE_COLOR and self.is_out_of_bounds(target_row, target_col):
+        # Check for invalid move - cannot push Hole off of board or onto another piece
+        if self.board[current_row][current_col].get_color() == HOLE_COLOR and (self.is_out_of_bounds(target_row, target_col) or self.board[target_row, target_col] is not None):
             return None
 
-        pieces_moved.append((target_row, target_col))
+        # Move may be good. Add to list of pieces moved this time and test further
+        pieces_moved.append((current_row, current_col))
 
-        # Pushing a piece off the board or into the hole completes the move
-        # (but we have to be sure it's not just a reverse of the last move, duplicating the prior board state)
-        if self.board[target_row][target_col] is None or self.board[target_row][target_col].color == HOLE_COLOR:
-            if pieces_moved == reversed(self.last_move):
-                return None
+        # Pushing a piece off the board or into the hole eliminates it, so there's no way this move is duplicating the
+        # last board state. Move successful.
+        if self.is_out_of_bounds(target_row, target_col) or self.board[target_row][target_col] is not None:
+            # We add the target row and col as a kind of 'capstone', which tells other functions 1) which direction
+            # we're shifting in the case of a single piece and 2) if we're pushing off board or into a hole
+            self.pieces_moved.append((target_row, target_col))
             return pieces_moved
 
-        # Recursive case
-        return self.make_move(target_row, target_col, 2 * target_row - current_row, 2* target_col - current_col, pieces_moved)
+        # Pushing a piece into another piece requires recursion
+        if self.board[target_row][target_col] is not None:
+            ph_row, ph_col = target_row, target_col
+            target_row, target_col = 2 * target_row - current_row, 2 * target_col - current_col
+            current_row, current_col = ph_row, ph_col
+            return self.make_move(current_row, current_col, target_row, target_col, pieces_moved)
 
+        # Pushing onto an empty square is valid, but we have to check if we are simply reversing the last move made,
+        # and returning to the preceding board position which is invalid.
+        # This case is indicated by the same set of pieces being moved, but in the opposite order
+        # So 'A pushes B pushes C' and 'C pushes B pushes A' is invalid
+        if pieces_moved == reversed(self.last_move):
+            return None
 
-
-
-
-
-
+        # Move valid - ends with a piece being pushed onto an empty square
+        # Add the target row/col to make later movement easier
+        self.pieces_moved.append((target_row, target_col))
+        return pieces_moved
