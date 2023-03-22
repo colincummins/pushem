@@ -72,11 +72,21 @@ class Board:
         if pieces_moved is None:
             pieces_moved = []
 
-        # Check for invalid moves
-
-        # Cannot push Hole off of board
+        # Test for invalid move - Cannot push Hole off of board
         if self.board[current_row][current_col].get_color() == HOLE_COLOR and self.is_out_of_bounds(target_row, target_col):
             return None
+
+        pieces_moved.append((target_row, target_col))
+
+        # Pushing a piece off the board or into the hole completes the move
+        # (but we have to be sure it's not just a reverse of the last move, duplicating the prior board state)
+        if self.board[target_row][target_col] is None or self.board[target_row][target_col].color == HOLE_COLOR:
+            if pieces_moved == reversed(self.last_move):
+                return None
+            return pieces_moved
+
+        # Recursive case
+        return self.make_move(target_row, target_col, 2 * target_row - current_row, 2* target_col - current_col, pieces_moved)
 
 
 
