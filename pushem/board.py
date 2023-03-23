@@ -1,15 +1,15 @@
 import pygame
 from itertools import product
 
-import pushem.piece
-from .constants import BLACK, WHITE, GRAY, P1_COLOR, P2_COLOR, HOLE_COLOR, SQUARE_SIZE, SQUARE_PAD, ROWS, COLS
-from .piece import PlayerPiece, HolePiece
+import pushem
+from pushem.constants import BLACK, WHITE, GRAY, P1_COLOR, P2_COLOR, HOLE_COLOR, SQUARE_SIZE, SQUARE_PAD, ROWS, COLS
+from pushem.piece import Piece, PlayerPiece, HolePiece
 
 
 class Board:
     def __init__(self):
         # For selecting a piece to move
-        self.selected_piece = None
+        self.selected_piece:Piece = None
         self.target_square = None
 
         # For checking if current move recreates the last board state, which is not allowed
@@ -27,6 +27,36 @@ class Board:
             self.board[ROWS - 2][col] = PlayerPiece(P2_COLOR, ROWS - 2, col)
             self.board[3][3] = HolePiece(HOLE_COLOR, 3, 3)
 
+    def set_selected(self, pos) -> None:
+        """
+        Set position of selected piece for movement
+        :param pos: row, col of selected piece
+        :return: None
+        """
+        if pos is None:
+            print("Deselected piece:",pos)
+            self.selected_piece.toggle_selected()
+            self.selected_piece = None
+            return
+
+        self.selected_piece = self.board[pos[0]][pos[1]]
+        self.selected_piece.toggle_selected()
+
+        print("Selected piece:",pos)
+
+    def set_target_square(self, pos) -> None:
+        """
+        Set position of targeted square for movement
+        :param pos: row, col of selected square
+        :return: None
+        """
+        if pos is None:
+            self.target_square = None
+            print("Deselected target square:",pos)
+
+        self.target_square = pos
+        print("Selected square:",pos)
+
     def draw_grid(self, win):
         """
         Draws grid onto surface 'win'
@@ -37,6 +67,14 @@ class Board:
         for row, col in product(range(1, ROWS - 1), range(1, COLS - 1)):
             self.square.center = ((SQUARE_SIZE // 2) + row * SQUARE_SIZE, (SQUARE_SIZE // 2) + col * SQUARE_SIZE)
             pygame.draw.rect(win, WHITE, self.square)
+
+    def toggle_selected(self, pos):
+        """
+        Toggle piece from selected to unselected
+        :param pos: (row, col) of piece to toggle
+        :return:
+        """
+        self.board[pos[0]][pos[1]].toggle_selected()
 
     def draw_pieces(self, win):
         """
@@ -58,7 +96,7 @@ class Board:
         """
         return row < 1 or row > ROWS - 2 or col < 1 or col > COLS - 2
 
-    def try_move(self, current_row:int, current_col:int, target_row:int, target_col:int, pieces_moved = None) -> [pushem.piece.Piece]:
+    def try_move(self, current_row:int, current_col:int, target_row:int, target_col:int, pieces_moved = None) :
         """
         Try to move piece from current to target.
         :param pieces_moved: List of pieces affected by this move so far

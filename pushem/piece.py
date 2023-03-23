@@ -1,5 +1,5 @@
 import pygame
-from .constants import SQUARE_SIZE, HOLE_COLOR, BLACK
+from .constants import SQUARE_SIZE, HOLE_COLOR, BLACK, BLUE
 
 PLAYER_SIZE = 70
 HOLE_SIZE = 90
@@ -10,6 +10,7 @@ class Piece:
     """
     All game pieces
     """
+
     def __init__(self, color, row, col):
         """
         Create a new piece
@@ -23,6 +24,11 @@ class Piece:
         self.x = 0
         self.y = 0
         self.calc_pos()
+        self.selected = False
+        self.bg_color = BLACK
+
+    def toggle_selected(self):
+        self.bg_color = BLUE if self.bg_color == BLACK else BLACK
 
     def calc_pos(self):
         """
@@ -45,7 +51,7 @@ class PlayerPiece(Piece):
     Pieces for player 1 and 2
     """
     def draw(self, win):
-        pygame.draw.rect(win, BLACK, (self.x - PLAYER_SIZE // 2, self.y - PLAYER_SIZE // 2, PLAYER_SIZE, PLAYER_SIZE))
+        pygame.draw.rect(win, self.bg_color, (self.x - PLAYER_SIZE // 2, self.y - PLAYER_SIZE // 2, PLAYER_SIZE, PLAYER_SIZE))
         pygame.draw.rect(win, self.color, (
         self.x - PLAYER_SIZE // 2 + PLAYER_BORDER, self.y - PLAYER_SIZE // 2 + PLAYER_BORDER,
         PLAYER_SIZE - 2 * PLAYER_BORDER, PLAYER_SIZE - 2 * PLAYER_BORDER))
@@ -56,4 +62,4 @@ class HolePiece(Piece):
     Hole Piece, owned by neither player
     """
     def draw(self, win):
-        pygame.draw.circle(win, HOLE_COLOR, (self.x, self.y), HOLE_SIZE // 2)
+        pygame.draw.circle(win, self.bg_color, (self.x, self.y), HOLE_SIZE // 2)
