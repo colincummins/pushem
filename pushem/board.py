@@ -117,7 +117,7 @@ class Board:
 
         # Pushing a piece off the board or into the hole eliminates it, so there's no way this move is duplicating the
         # last board state. Move successful.
-        if self.is_out_of_bounds(target_row, target_col) or self.board[target_row][target_col] is not None:
+        if self.is_out_of_bounds(target_row, target_col) or self.board[target_row][target_col] is not None and self.board[target_row][target_col].color == HOLE_COLOR:
             # We add the target row and col as a kind of 'capstone', which tells other functions 1) which direction
             # we're shifting in the case of a single piece and 2) if we're pushing off board or into a hole
             pieces_moved.append((target_row, target_col))
@@ -128,7 +128,7 @@ class Board:
             ph_row, ph_col = target_row, target_col
             target_row, target_col = 2 * target_row - current_row, 2 * target_col - current_col
             current_row, current_col = ph_row, ph_col
-            return self.make_move(current_row, current_col, target_row, target_col, pieces_moved)
+            return self.try_move(current_row, current_col, target_row, target_col, pieces_moved)
 
         # Pushing onto an empty square is valid, but we have to check if we are simply reversing the last move made,
         # and returning to the preceding board position which is invalid.
