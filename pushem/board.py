@@ -156,6 +156,23 @@ class Board:
 
         return (row_delta == 0 and col_delta == 1) or (row_delta == 1 and col_delta == 0)
 
+    def move_pieces(self, move_list:list((int,int))) -> None:
+        """
+        Moves pieces in the list. Last element of the list is the space all pieces are shifted towards
+        Drops a piece if it goes off the edge of the board or into the hole
+        """
+        target_row, target_col = move_list.pop()
+        while move_list:
+            if self.is_out_of_bounds(target_row, target_col) or self.board[target_row][target_col] is not None and self.board[target_row][target_col].color == HOLE_COLOR:
+                del self.board[move_list[-1][0]][move_list[-1][1]]
+                self.board[move_list[-1][0]][move_list[-1][1]] = None
+                move_list.pop()
+            else:
+                self.board[move_list[-1][0]][move_list[-1][1]].move(target_row, target_col)
+                self.board[target_row][target_col] = self.board[move_list[-1][0]][move_list[-1][1]]
+            if move_list:
+                target_row, target_col = move_list.pop()
+
     def take_turn(self, current_row:int, current_col:int, target_row:int, target_col:int):
         """
         Checks validity of input and, if valid, takes a turn
@@ -179,11 +196,9 @@ class Board:
         if not moved:
             return None
 
-
-
-        self.last_move = moved
-
         print("Pieces moved: ", moved)
+        self.move_pieces(moved)
+        self.last_move = moved
 
 
 
