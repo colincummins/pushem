@@ -156,7 +156,6 @@ class Board:
 
         return (row_delta == 0 and col_delta == 1) or (row_delta == 1 and col_delta == 0)
 
-
     def take_turn(self, current_row:int, current_col:int, target_row:int, target_col:int):
         """
         Checks validity of input and, if valid, takes a turn
@@ -179,6 +178,8 @@ class Board:
         moved = self.try_move(current_row, current_col, target_row, target_col)
         if not moved:
             return None
+
+
 
         self.last_move = moved
 

@@ -45,6 +45,16 @@ class Piece:
         """
         return self.color
 
+    def move(self, row, col):
+        """
+        Move piece to row, col
+        :return: None
+        """
+        self.row = row
+        self.col = col
+        self.calc_pos()
+
+
 
 class PlayerPiece(Piece):
     """
