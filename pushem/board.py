@@ -13,7 +13,7 @@ class Board:
         self.target_square = None
 
         # For checking if current move recreates the last board state, which is not allowed
-        self.last_move = None
+        self.last_move = [(-1,-1)]
 
         # Used in turn taking
         self.turn = P1_COLOR
@@ -109,7 +109,7 @@ class Board:
             pieces_moved = []
 
         # Check for invalid move - cannot push Hole off of board or onto another piece
-        if self.board[current_row][current_col].get_color() == HOLE_COLOR and (self.is_out_of_bounds(target_row, target_col) or self.board[target_row, target_col] is not None):
+        if self.board[current_row][current_col].get_color() == HOLE_COLOR and (self.is_out_of_bounds(target_row, target_col) or self.board[target_row][target_col] is not None):
             return None
 
         # Move may be good. Add to list of pieces moved this time and test further
@@ -120,7 +120,7 @@ class Board:
         if self.is_out_of_bounds(target_row, target_col) or self.board[target_row][target_col] is not None:
             # We add the target row and col as a kind of 'capstone', which tells other functions 1) which direction
             # we're shifting in the case of a single piece and 2) if we're pushing off board or into a hole
-            self.pieces_moved.append((target_row, target_col))
+            pieces_moved.append((target_row, target_col))
             return pieces_moved
 
         # Pushing a piece into another piece requires recursion
@@ -139,20 +139,56 @@ class Board:
 
         # Move valid - ends with a piece being pushed onto an empty square
         # Add the target row/col to make later movement easier
-        self.pieces_moved.append((target_row, target_col))
+        pieces_moved.append((target_row, target_col))
         return pieces_moved
+
+    def is_adjacent(self, current_row:int, current_col:int, target_row:int, target_col:int):
+        """
+        Test if current square and destination square are adjacent
+        :param current_row: Row of piece to move (int)
+        :param current_col: Col of piece to move (int)
+        :param target_row: Destination row (int)
+        :param target_col: Destination column (int)
+        :return: (bool) True if squares are adjacent, False if not
+        """
+        row_delta = abs(current_row - target_row)
+        col_delta = abs(current_col - target_col)
+
+        return (row_delta == 0 and col_delta == 1) or (row_delta == 1 and col_delta == 0)
 
 
     def take_turn(self, current_row:int, current_col:int, target_row:int, target_col:int):
         """
         Checks validity of input and, if valid, takes a turn
-        :param current_row:
-        :param current_col:
-        :param target_row:
-        :param target_col:
-        :return:
+        :param current_row: Row of piece to move (int)
+        :param current_col: Col of piece to move (int)
+        :param target_row: Destination row (int)
+        :param target_col: Destination column (int)
+        :return: (bool) True if turn was successfully taken, False if move was invalid and turn not taken
         """
+        # Regardless of turn outcome we deselect the piece so whoever is moving next has a clean slate
+        self.set_selected(self.selected_piece)
 
         # @todo Check that it is current players turn
+        print(f"Attempting turn {current_row},{current_col} to {target_row},{target_col}")
+
+        if not self.is_adjacent(current_row, current_col, target_row, target_col):
+            print("Squares are not adjacent")
+            return False
+
+        moved = self.try_move(current_row, current_col, target_row, target_col)
+        if not moved:
+            return None
+
+        self.last_move = moved
+
+        print("Pieces moved: ", moved)
+
+
+
+        print("Turn successful")
+        return True
+
+
 
 

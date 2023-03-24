@@ -37,7 +37,7 @@ def main():
                     board.set_selected(position)
                 elif board.selected_piece is not None and board.selected_piece == position:
                     board.set_selected(position)
-                else:
+                elif board.selected_piece is not None:
                     board.take_turn(board.selected_piece[0], board.selected_piece[1], position[0], position[1])
 
 
