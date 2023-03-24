@@ -3,7 +3,7 @@ from .constants import SQUARE_SIZE, HOLE_COLOR, BLACK, BLUE
 
 PLAYER_SIZE = 70
 HOLE_SIZE = 90
-PLAYER_BORDER = 5
+PIECE_BORDER = 5
 
 
 class Piece:
@@ -53,8 +53,8 @@ class PlayerPiece(Piece):
     def draw(self, win):
         pygame.draw.rect(win, self.bg_color, (self.x - PLAYER_SIZE // 2, self.y - PLAYER_SIZE // 2, PLAYER_SIZE, PLAYER_SIZE))
         pygame.draw.rect(win, self.color, (
-        self.x - PLAYER_SIZE // 2 + PLAYER_BORDER, self.y - PLAYER_SIZE // 2 + PLAYER_BORDER,
-        PLAYER_SIZE - 2 * PLAYER_BORDER, PLAYER_SIZE - 2 * PLAYER_BORDER))
+            self.x - PLAYER_SIZE // 2 + PIECE_BORDER, self.y - PLAYER_SIZE // 2 + PIECE_BORDER,
+            PLAYER_SIZE - 2 * PIECE_BORDER, PLAYER_SIZE - 2 * PIECE_BORDER))
 
 
 class HolePiece(Piece):
@@ -63,3 +63,4 @@ class HolePiece(Piece):
     """
     def draw(self, win):
         pygame.draw.circle(win, self.bg_color, (self.x, self.y), HOLE_SIZE // 2)
+        pygame.draw.circle(win, self.color, (self.x, self.y), (HOLE_SIZE // 2) - PIECE_BORDER)

@@ -9,7 +9,7 @@ from pushem.piece import Piece, PlayerPiece, HolePiece
 class Board:
     def __init__(self):
         # For selecting a piece to move
-        self.selected_piece:Piece = None
+        self.selected_piece = None
         self.target_square = None
 
         # For checking if current move recreates the last board state, which is not allowed
@@ -33,15 +33,13 @@ class Board:
         :param pos: row, col of selected piece
         :return: None
         """
-        if pos is None:
+        self.board[pos[0]][pos[1]].toggle_selected()
+        if pos == self.selected_piece:
             print("Deselected piece:",pos)
-            self.selected_piece.toggle_selected()
             self.selected_piece = None
             return
 
-        self.selected_piece = self.board[pos[0]][pos[1]]
-        self.selected_piece.toggle_selected()
-
+        self.selected_piece = pos
         print("Selected piece:",pos)
 
     def set_target_square(self, pos) -> None:
@@ -143,3 +141,18 @@ class Board:
         # Add the target row/col to make later movement easier
         self.pieces_moved.append((target_row, target_col))
         return pieces_moved
+
+
+    def take_turn(self, current_row:int, current_col:int, target_row:int, target_col:int):
+        """
+        Checks validity of input and, if valid, takes a turn
+        :param current_row:
+        :param current_col:
+        :param target_row:
+        :param target_col:
+        :return:
+        """
+
+        # @todo Check that it is current players turn
+
+

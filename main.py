@@ -35,8 +35,10 @@ def main():
                 position = get_row_col(pygame.mouse.get_pos())
                 if board.selected_piece is None and board.board[position[0]][position[1]] is not None:
                     board.set_selected(position)
-                elif board.selected_piece is not None and board.selected_piece == board.board[position[0]][position[1]]:
-                    board.set_selected(None)
+                elif board.selected_piece is not None and board.selected_piece == position:
+                    board.set_selected(position)
+                else:
+                    board.take_turn(board.selected_piece[0], board.selected_piece[1], position[0], position[1])
 
 
 
