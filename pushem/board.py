@@ -195,9 +195,11 @@ class Board:
         if not moved:
             return False
 
+        # This will be a valid move. Now actually move the pieces, record as the last move, and change turn player
         print("Pieces moved: ", moved)
         self.last_move = moved[:]
         self.move_pieces(moved)
+        self.turn = P2_COLOR if self.turn == P1_COLOR else P1_COLOR
 
 
 
