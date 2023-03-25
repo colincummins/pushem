@@ -134,12 +134,11 @@ class Board:
         # and returning to the preceding board position which is invalid.
         # This case is indicated by the same set of pieces being moved, but in the opposite order
         # So 'A pushes B pushes C' and 'C pushes B pushes A' is invalid
-        if pieces_moved == reversed(self.last_move):
-            return None
-
-        # Move valid - ends with a piece being pushed onto an empty square
         # Add the target row/col to make later movement easier
         pieces_moved.append((target_row, target_col))
+        if pieces_moved == list(reversed(self.last_move)):
+            return None
+
         return pieces_moved
 
     def is_adjacent(self, current_row:int, current_col:int, target_row:int, target_col:int):
@@ -194,11 +193,11 @@ class Board:
 
         moved = self.try_move(current_row, current_col, target_row, target_col)
         if not moved:
-            return None
+            return False
 
         print("Pieces moved: ", moved)
+        self.last_move = moved[:]
         self.move_pieces(moved)
-        self.last_move = moved
 
 
 
