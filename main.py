@@ -33,7 +33,8 @@ def main():
                 run = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 position = get_row_col(pygame.mouse.get_pos())
-                if board.selected_piece is None and board.board[position[0]][position[1]] is not None:
+                selected = board.get_piece(position)
+                if board.selected_piece is None and selected is not None and board.is_turn(selected):
                     board.set_selected(position)
                 elif board.selected_piece is not None and board.selected_piece == position:
                     board.set_selected(position)

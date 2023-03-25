@@ -1,7 +1,6 @@
 import pygame
 from itertools import product
 
-import pushem
 from pushem.constants import BLACK, WHITE, GRAY, P1_COLOR, P2_COLOR, HOLE_COLOR, SQUARE_SIZE, SQUARE_PAD, ROWS, COLS
 from pushem.piece import Piece, PlayerPiece, HolePiece
 
@@ -55,6 +54,9 @@ class Board:
         self.target_square = pos
         print("Selected square:",pos)
 
+    def get_piece(self, pos):
+        return self.board[pos[0]][pos[1]]
+
     def draw_grid(self, win):
         """
         Draws grid onto surface 'win'
@@ -93,6 +95,14 @@ class Board:
         :return: True if coord pair is off the board
         """
         return row < 1 or row > ROWS - 2 or col < 1 or col > COLS - 2
+
+    def is_turn(self, piece):
+        """
+        Determine if piece is one the current player can move
+        :param piece: Piece to check (pygame.Piece)
+        :return: True if piece belongs to current player or is the Hole, False if opposite player's color
+        """
+        return piece.color == self.turn or piece.color == HOLE_COLOR
 
     def try_move(self, current_row:int, current_col:int, target_row:int, target_col:int, pieces_moved = None) :
         """
