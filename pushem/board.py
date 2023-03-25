@@ -164,12 +164,12 @@ class Board:
         target_row, target_col = move_list.pop()
         while move_list:
             if self.is_out_of_bounds(target_row, target_col) or self.board[target_row][target_col] is not None and self.board[target_row][target_col].color == HOLE_COLOR:
-                del self.board[move_list[-1][0]][move_list[-1][1]]
                 self.board[move_list[-1][0]][move_list[-1][1]] = None
-                move_list.pop()
             else:
                 self.board[move_list[-1][0]][move_list[-1][1]].move(target_row, target_col)
                 self.board[target_row][target_col] = self.board[move_list[-1][0]][move_list[-1][1]]
+                self.board[move_list[-1][0]][move_list[-1][1]] = None
+
             if move_list:
                 target_row, target_col = move_list.pop()
 
