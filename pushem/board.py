@@ -12,10 +12,15 @@ class Board:
         self.target_square = None
 
         # For checking if current move recreates the last board state, which is not allowed
-        self.last_move = [(-1,-1)]
+        self.last_move = [(-1, -1)]
 
         # Used in turn taking
         self.turn = P1_COLOR
+
+        # Track victory conditions
+        self.dropped_pieces = []
+        self.p1_score = 0
+        self.p2_score = 0
 
         # Create the grid and the square used to render it
         # Populate grid with starting pieces
@@ -34,12 +39,12 @@ class Board:
         """
         self.board[pos[0]][pos[1]].toggle_selected()
         if pos == self.selected_piece:
-            print("Deselected piece:",pos)
+            print("Deselected piece:", pos)
             self.selected_piece = None
             return
 
         self.selected_piece = pos
-        print("Selected piece:",pos)
+        print("Selected piece:", pos)
 
     def set_target_square(self, pos) -> None:
         """
@@ -49,10 +54,10 @@ class Board:
         """
         if pos is None:
             self.target_square = None
-            print("Deselected target square:",pos)
+            print("Deselected target square:", pos)
 
         self.target_square = pos
-        print("Selected square:",pos)
+        print("Selected square:", pos)
 
     def get_piece(self, pos):
         return self.board[pos[0]][pos[1]]
@@ -104,7 +109,7 @@ class Board:
         """
         return piece.color == self.turn or piece.color == HOLE_COLOR
 
-    def try_move(self, current_row:int, current_col:int, target_row:int, target_col:int, pieces_moved = None) :
+    def try_move(self, current_row: int, current_col: int, target_row: int, target_col: int, pieces_moved=None):
         """
         Try to move piece from current to target.
         :param pieces_moved: List of pieces affected by this move so far
@@ -119,7 +124,8 @@ class Board:
             pieces_moved = []
 
         # Check for invalid move - cannot push Hole off of board or onto another piece
-        if self.board[current_row][current_col].get_color() == HOLE_COLOR and (self.is_out_of_bounds(target_row, target_col) or self.board[target_row][target_col] is not None):
+        if self.board[current_row][current_col].get_color() == HOLE_COLOR and (
+                self.is_out_of_bounds(target_row, target_col) or self.board[target_row][target_col] is not None):
             return None
 
         # Move may be good. Add to list of pieces moved this time and test further
@@ -127,7 +133,8 @@ class Board:
 
         # Pushing a piece off the board or into the hole eliminates it, so there's no way this move is duplicating the
         # last board state. Move successful.
-        if self.is_out_of_bounds(target_row, target_col) or self.board[target_row][target_col] is not None and self.board[target_row][target_col].color == HOLE_COLOR:
+        if self.is_out_of_bounds(target_row, target_col) or self.board[target_row][target_col] is not None and \
+                self.board[target_row][target_col].color == HOLE_COLOR:
             # We add the target row and col as a kind of 'capstone', which tells other functions 1) which direction
             # we're shifting in the case of a single piece and 2) if we're pushing off board or into a hole
             pieces_moved.append((target_row, target_col))
@@ -151,7 +158,7 @@ class Board:
 
         return pieces_moved
 
-    def is_adjacent(self, current_row:int, current_col:int, target_row:int, target_col:int):
+    def is_adjacent(self, current_row: int, current_col: int, target_row: int, target_col: int):
         """
         Test if current square and destination square are adjacent
         :param current_row: Row of piece to move (int)
@@ -165,14 +172,39 @@ class Board:
 
         return (row_delta == 0 and col_delta == 1) or (row_delta == 1 and col_delta == 0)
 
-    def move_pieces(self, move_list:list((int,int))) -> None:
+    def drop_piece(self, piece: Piece) -> None:
+        """
+        Drop a piece, update player victory conditions, set winner as needed
+        :param piece: Piece to drop
+        :return: None
+        """
+        self.dropped_pieces.append(piece)
+        self.p1_score += piece.get_color() == P2_COLOR
+        self.p2_score += piece.get_color() == P1_COLOR
+
+    def get_winner(self):
+        """
+        Return winner of game
+        :return: If there is a winner, color of winner. If not, None
+        """
+        if self.p1_score == 2:
+            return P1_COLOR
+
+        if self.p2_score == 2:
+            return P2_COLOR
+
+        return None
+
+    def move_pieces(self, move_list: list((int, int))) -> None:
         """
         Moves pieces in the list. Last element of the list is the space all pieces are shifted towards
         Drops a piece if it goes off the edge of the board or into the hole
         """
         target_row, target_col = move_list.pop()
         while move_list:
-            if self.is_out_of_bounds(target_row, target_col) or self.board[target_row][target_col] is not None and self.board[target_row][target_col].color == HOLE_COLOR:
+            if self.is_out_of_bounds(target_row, target_col) or self.board[target_row][target_col] is not None and \
+                    self.board[target_row][target_col].color == HOLE_COLOR:
+                self.drop_piece(self.board[move_list[-1][0]][move_list[-1][1]])
                 self.board[move_list[-1][0]][move_list[-1][1]] = None
             else:
                 self.board[move_list[-1][0]][move_list[-1][1]].move(target_row, target_col)
@@ -182,7 +214,7 @@ class Board:
             if move_list:
                 target_row, target_col = move_list.pop()
 
-    def take_turn(self, current_row:int, current_col:int, target_row:int, target_col:int):
+    def take_turn(self, current_row: int, current_col: int, target_row: int, target_col: int):
         """
         Checks validity of input and, if valid, takes a turn
         :param current_row: Row of piece to move (int)
@@ -206,16 +238,9 @@ class Board:
             return False
 
         # This will be a valid move. Now actually move the pieces, record as the last move, and change turn player
-        print("Pieces moved: ", moved)
         self.last_move = moved[:]
         self.move_pieces(moved)
         self.turn = P2_COLOR if self.turn == P1_COLOR else P1_COLOR
+        print(f"Winner {self.get_winner()}")
 
-
-
-        print("Turn successful")
         return True
-
-
-
-
