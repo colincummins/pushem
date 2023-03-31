@@ -22,8 +22,8 @@ class Board:
         self.square = pygame.Rect(0, 0, SQUARE_SIZE - SQUARE_PAD, SQUARE_SIZE - SQUARE_PAD)
         self.board = [[None] * COLS for j in range(ROWS)]
         for col in range(1, COLS - 1):
-            self.board[1][col] = PlayerPiece(P1_COLOR, 1, col)
-            self.board[ROWS - 2][col] = PlayerPiece(P2_COLOR, ROWS - 2, col)
+            self.board[1][col] = PlayerPiece(P2_COLOR, 1, col)
+            self.board[ROWS - 2][col] = PlayerPiece(P1_COLOR, ROWS - 2, col)
             self.board[3][3] = HolePiece(HOLE_COLOR, 3, 3)
 
     def set_selected(self, pos) -> None:
