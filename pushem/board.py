@@ -6,7 +6,7 @@ from pushem.piece import Piece, PlayerPiece, HolePiece
 
 
 class Board:
-    def __init__(self):
+    def __init__(self, first_player):
         # For selecting a piece to move
         self.selected_piece = None
         self.target_square = None
@@ -15,7 +15,7 @@ class Board:
         self.last_move = [(-1, -1)]
 
         # Used in turn taking
-        self.turn = P1_COLOR
+        self.turn = P1_COLOR if first_player == 0 else P2_COLOR
 
         # Track victory conditions
         self.dropped_pieces = []

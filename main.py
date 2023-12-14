@@ -1,6 +1,7 @@
 import pygame
 from pushem.constants import WIDTH, HEIGHT, SQUARE_SIZE
 from pushem.board import Board
+from random import randint
 
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 FPS = 60
@@ -21,9 +22,15 @@ def main():
     Sets up new game, provides user input to same.
     :return:
     """
+    # Randomly determine starting player
+    first_player = randint(0,1)
+    print("First Player: ", first_player)
+
     run = True
     clock = pygame.time.Clock()
-    board = Board()
+    board = Board(first_player)
+
+
 
     """Main logic/rendering loop"""
     while run:
