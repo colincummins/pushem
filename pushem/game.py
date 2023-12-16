@@ -24,7 +24,6 @@ class Game:
 
     def start_game(self):
         self.mode = "play"
-        print(self.mode)
 
     def quit_game(self):
         pass
@@ -44,7 +43,7 @@ class Game:
 
         menu = pygame_menu.Menu('PushEm', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE)
         menu.add.button('Play', self.start_game)
-        menu.add.button('Quit', self.quit_game)
+        menu.add.button('Quit', pygame_menu.events.EXIT)
 
 
         """Main logic/rendering loop"""
@@ -70,7 +69,13 @@ class Game:
             if menu.is_enabled():
                 menu.update(events)
                 menu.draw(self.WIN)
+                if self.mode != "menu":
+                    menu.toggle()
             pygame.display.update()
 
         pygame.quit()
+
+if __name__ == "__main__":
+    mygame = Game()
+    mygame.run_game()
 
