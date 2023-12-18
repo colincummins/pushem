@@ -12,7 +12,7 @@ class Game:
         self.WIN = pygame.display.set_mode((WIDTH, HEIGHT))
         self.FPS = 60
         pygame.display.set_caption("PushEm")
-        self.mode = "menu"
+        self.mode = "main_menu"
 
     def get_row_col(self, pos: (int, int)) -> (int, int):
         """
@@ -24,9 +24,7 @@ class Game:
 
     def start_game(self):
         self.mode = "play"
-
-    def quit_game(self):
-        pass
+        pygame_menu.events.CLOSE
 
     def run_game(self):
         """
@@ -41,10 +39,12 @@ class Game:
         clock = pygame.time.Clock()
         board = Board(first_player)
 
-        menu = pygame_menu.Menu('PushEm', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE)
-        menu.add.button('Play', self.start_game)
-        menu.add.button('Quit', pygame_menu.events.EXIT)
+        announce_first = pygame_menu.Menu('First Player', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE)
+        announce_first.add.button('OK', self.start_game())
 
+        main_menu = pygame_menu.Menu('PushEm', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE)
+        main_menu.add.button('Play', announce_first)
+        main_menu.add.button('Quit', pygame_menu.events.EXIT)
 
         """Main logic/rendering loop"""
         while run:
@@ -54,7 +54,7 @@ class Game:
             for event in events:
                 if event.type == pygame.QUIT:
                     run = False
-                if event.type == pygame.MOUSEBUTTONDOWN and self.mode=="play":
+                if event.type == pygame.MOUSEBUTTONDOWN and self.mode == "play":
                     position = self.get_row_col(pygame.mouse.get_pos())
                     selected = board.get_piece(position)
                     if board.selected_piece is None and selected is not None and board.is_turn(selected):
@@ -66,16 +66,16 @@ class Game:
 
             board.draw_grid(self.WIN)
             board.draw_pieces(self.WIN)
-            if menu.is_enabled():
-                menu.update(events)
-                menu.draw(self.WIN)
-                if self.mode != "menu":
-                    menu.toggle()
+
+            if main_menu.is_enabled():
+                main_menu.draw(self.WIN)
+                main_menu.update(events)
+
             pygame.display.update()
 
         pygame.quit()
 
+
 if __name__ == "__main__":
     mygame = Game()
     mygame.run_game()
-
