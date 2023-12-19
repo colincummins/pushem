@@ -22,9 +22,8 @@ class Game:
         """
         return pos[1] // SQUARE_SIZE, pos[0] // SQUARE_SIZE
 
-    def start_game(self):
+    def resume_play(self):
         self.mode = "play"
-        pygame_menu.events.CLOSE
 
     def run_game(self):
         """
@@ -39,8 +38,8 @@ class Game:
         clock = pygame.time.Clock()
         board = Board(first_player)
 
-        announce_first = pygame_menu.Menu('First Player', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE)
-        announce_first.add.button('OK', self.start_game())
+        announce_first = pygame_menu.Menu('First Player', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE, onclose=self.resume_play())
+        announce_first.add.button('OK', pygame_menu.events.CLOSE)
 
         main_menu = pygame_menu.Menu('PushEm', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE)
         main_menu.add.button('Play', announce_first)
