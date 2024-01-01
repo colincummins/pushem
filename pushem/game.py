@@ -46,11 +46,15 @@ class Game:
         board = Board(first_player)
 
         announce_first = pygame_menu.Menu('First Player', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE)
-        announce_first.add.button('OK', pygame_menu.events.CLOSE)
+        announce_first.add.label("Computer is first" if first_player else "You are first")
+        announce_first.add.button('OK', self.set_mode, "play")
 
         main_menu = pygame_menu.Menu('PushEm', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE)
-        main_menu.add.button('Play', self.set_mode, "play")
+        main_menu.add.button('Play', self.set_mode, announce_first)
         main_menu.add.button('Quit', pygame_menu.events.EXIT)
+
+        self.set_mode(main_menu)
+
 
         """Main logic/rendering loop"""
         while run:
@@ -75,9 +79,9 @@ class Game:
 
             print(self.mode)
 
-            if main_menu.is_enabled() and self.mode == "main_menu":
-                main_menu.draw(self.WIN)
-                main_menu.update(events)
+            if self.mode != "play":
+                self.mode.draw(self.WIN)
+                self.mode.update(events)
 
             pygame.display.update()
 
