@@ -56,7 +56,6 @@ class Game:
 
         announce_winner = pygame_menu.Menu('Game Over', WIDTH / 2, HEIGHT / 2,
                                            theme=pygame_menu.themes.THEME_BLUE)
-        announce_winner.add.button('Quit', pygame_menu.events.EXIT)
 
         self.set_mode(main_menu)
 
@@ -66,10 +65,10 @@ class Game:
             clock.tick(self.FPS)
 
             winner = board.get_winner()
-            if winner:
-                run = False
-                continue
-
+            if winner and self.mode != announce_winner:
+                announce_winner.add.label("You Won!" if winner == P1_COLOR else "Computer Won")
+                announce_winner.add.button('Quit', pygame_menu.events.EXIT)
+                self.mode = announce_winner
 
             events = pygame.event.get()
             for event in events:
