@@ -1,6 +1,6 @@
 import pygame
 import pygame_menu
-from pushem.constants import WIDTH, HEIGHT, SQUARE_SIZE
+from pushem.constants import WIDTH, HEIGHT, SQUARE_SIZE, P1_COLOR, P2_COLOR
 from pushem.board import Board
 from random import randint
 
@@ -42,6 +42,7 @@ class Game:
         print("First Player: ", first_player)
 
         run = True
+        new_game = True
         clock = pygame.time.Clock()
         board = Board(first_player)
 
@@ -53,12 +54,22 @@ class Game:
         main_menu.add.button('Play', self.set_mode, announce_first)
         main_menu.add.button('Quit', pygame_menu.events.EXIT)
 
+        announce_winner = pygame_menu.Menu('Game Over', WIDTH / 2, HEIGHT / 2,
+                                           theme=pygame_menu.themes.THEME_BLUE)
+        announce_winner.add.button('Quit', pygame_menu.events.EXIT)
+
         self.set_mode(main_menu)
 
 
         """Main logic/rendering loop"""
         while run:
             clock.tick(self.FPS)
+
+            winner = board.get_winner()
+            if winner:
+                run = False
+                continue
+
 
             events = pygame.event.get()
             for event in events:
@@ -77,13 +88,12 @@ class Game:
             board.draw_grid(self.WIN)
             board.draw_pieces(self.WIN)
 
-            print(self.mode)
-
             if self.mode != "play":
                 self.mode.draw(self.WIN)
                 self.mode.update(events)
 
             pygame.display.update()
+
 
         pygame.quit()
 
