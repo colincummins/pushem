@@ -35,10 +35,6 @@ class Game:
         """
         return pos[1] // SQUARE_SIZE, pos[0] // SQUARE_SIZE
 
-    def resume_play(self):
-        print("resuming play")
-        self.mode = "play"
-
     def run_game(self):
         """
         sets up new game, provides user input to same.
