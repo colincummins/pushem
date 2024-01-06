@@ -3,6 +3,7 @@ from itertools import product
 
 from pushem.constants import BLACK, WHITE, GRAY, P1_COLOR, P2_COLOR, HOLE_COLOR, SQUARE_SIZE, SQUARE_PAD, ROWS, COLS
 from pushem.piece import Piece, PlayerPiece, HolePiece
+from pushem.scoremarker import ScoreMarker
 
 
 class Board:
@@ -92,6 +93,15 @@ class Board:
                 if self.board[row][col] is not None:
                     self.board[row][col].draw(win)
 
+    def draw_score(self, win):
+        """
+        Draw the score markers and labels
+        :param win: Target surface
+        :return:
+        """
+        for piece in self.dropped_pieces:
+            piece.draw(win)
+
     @staticmethod
     def is_out_of_bounds(row, col) -> bool:
         """
@@ -178,9 +188,18 @@ class Board:
         :param piece: Piece to drop
         :return: None
         """
-        self.dropped_pieces.append(piece)
-        self.p1_score += piece.get_color() == P2_COLOR
-        self.p2_score += piece.get_color() == P1_COLOR
+
+        # We need to update the score, but also figure out where to add the new score marker based on which player
+        # score just got updated and whether it's the first or second point for that player
+        if piece.get_color() == P2_COLOR:
+            self.p1_score += 1
+            drop_position = 3 + self.p1_score
+        else:
+            self.p2_score += 1
+            drop_position = self.p2_score
+
+        dropped = ScoreMarker(piece.get_color(), drop_position)
+        self.dropped_pieces.append(dropped)
 
     def get_winner(self):
         """
