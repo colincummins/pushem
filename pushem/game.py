@@ -3,6 +3,7 @@ import pygame_menu
 from pushem.constants import WIDTH, HEIGHT, SQUARE_SIZE, P1_COLOR, P2_COLOR
 from pushem.board import Board
 from random import randint
+from automa import Automa
 
 
 class Game:
@@ -51,6 +52,7 @@ class Game:
             run = True
             clock = pygame.time.Clock()
             board = Board(first_player)
+            automa = Automa(board)
 
             announce_first = pygame_menu.Menu('First Player', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE)
             announce_first.add.label("Computer is first" if first_player else "You are first")

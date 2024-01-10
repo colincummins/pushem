@@ -1,3 +1,3 @@
 class Automa:
-    def __init__(self):
-        pass
+    def __init__(self, board):
+        self.board = board
