@@ -32,6 +32,28 @@ class Board:
             self.board[ROWS - 2][col] = PlayerPiece(P1_COLOR, ROWS - 2, col)
             self.board[3][3] = HolePiece(HOLE_COLOR, 3, 3)
 
+    def save_state(self, affected_spaces):
+        """
+        Exports the current state of the board. Used by automa to capture state before making moves, allowing it to
+        backtrack more easily.
+
+        Rather than capture the whole board, it only captures the squares affected by the last move made.
+
+        Also captures player turn and player scores
+        :return: (current turn player, player 1 score, player 2 score, last move, ((row, col, piece) ... (row, col, piece)))
+        """
+        modified_spaces = tuple([tuple([row, col, self.board[row][col]]) for row, col in affected_spaces])
+        return self.turn, self.p1_score, self.p2_score, self.last_move[:], modified_spaces
+
+    def restore_state(self, state):
+        """
+        Restores the board to saved state, including piece placement, player scores, and current turn
+        :return: None
+        """
+        self.turn, self.p1_score, self.p2_score, self.last_move, modified_spaces = state
+        for row, col, piece in modified_spaces:
+            self.board[row][col] = piece
+
     def set_selected(self, pos) -> None:
         """
         Set position of selected piece for movement
@@ -245,7 +267,6 @@ class Board:
         # Regardless of turn outcome we deselect the piece so whoever is moving next has a clean slate
         self.set_selected(self.selected_piece)
 
-        # @todo Check that it is current players turn
         print(f"Attempting turn {current_row},{current_col} to {target_row},{target_col}")
 
         if not self.is_adjacent(current_row, current_col, target_row, target_col):
