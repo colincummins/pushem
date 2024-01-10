@@ -31,6 +31,9 @@ class Board:
             self.board[1][col] = PlayerPiece(P2_COLOR, 1, col)
             self.board[ROWS - 2][col] = PlayerPiece(P1_COLOR, ROWS - 2, col)
             self.board[3][3] = HolePiece(HOLE_COLOR, 3, 3)
+    def __str__(self):
+        color_dict = {None:"0", P1_COLOR:"1", P2_COLOR:"2", HOLE_COLOR:"X"}
+        return "\n".join(["".join([color_dict[piece.color] if piece else "0" for piece in row]) for row in self.board])
 
     def save_state(self, affected_spaces):
         """
