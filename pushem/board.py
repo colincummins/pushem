@@ -217,6 +217,7 @@ class Board:
 
         # We need to update the score, but also figure out where to add the new score marker based on which player
         # score just got updated and whether it's the first or second point for that player
+        piece.move(None, None)
         if piece.get_color() == P2_COLOR:
             self.p1_score += 1
             drop_position = 3 + self.p1_score
