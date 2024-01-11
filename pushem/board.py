@@ -279,7 +279,7 @@ class Board:
             if move_list:
                 target_row, target_col = move_list.pop()
 
-    def take_turn(self, current_row: int, current_col: int, target_row: int, target_col: int):
+    def take_turn(self, current_row: int, current_col: int, target_row: int, target_col: int, hypothetical = False):
         """
         Checks validity of input and, if valid, takes a turn
         :param current_row: Row of piece to move (int)
@@ -289,7 +289,7 @@ class Board:
         :return: (bool) True if turn was successfully taken, False if move was invalid and turn not taken
         """
         # Regardless of turn outcome we deselect the piece so whoever is moving next has a clean slate
-        self.set_selected(self.selected_piece)
+        hypothetical or self.set_selected(self.selected_piece)
 
         print(f"Attempting turn {current_row},{current_col} to {target_row},{target_col}")
 

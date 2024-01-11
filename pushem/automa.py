@@ -79,18 +79,18 @@ class Automa:
                 move_candidates.append((piece.row, piece.col, row, col))
 
         for start_row, start_col, target_row, target_col in move_candidates:
-            move = self.board.try_move(start_row, start_col, target_row, target_col)
+            move = self.board.try_move(start_row, start_col,target_row, target_col)
             if move:
                 state = self.board.save_state(move)
-                self.board.move_pieces(move)
-                score, _ = self.minmax(depth - 1, not maxplayer)
-                if maxplayer and score >= current_max:
-                    current_max = score
-                    best_move = move
-                elif not maxplayer and score <= current_min:
-                    current_min = score
-                    best_move = move
-                self.board.restore_state(state)
+                if self.board.take_turn(start_row, start_col, target_row, target_col, True):
+                    score, _ = self.minmax(depth - 1, not maxplayer)
+                    if maxplayer and score >= current_max:
+                        current_max = score
+                        best_move = (start_row, start_col, target_row, target_col)
+                    elif not maxplayer and score <= current_min:
+                        current_min = score
+                        best_move = (start_row, start_col, target_row, target_col)
+                    self.board.restore_state(state)
 
         return score, best_move
 
