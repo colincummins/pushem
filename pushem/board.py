@@ -252,6 +252,10 @@ class Board:
                     self.board[target_row][target_col].color == HOLE_COLOR:
                 self.drop_piece(self.board[move_list[-1][0]][move_list[-1][1]])
                 self.board[move_list[-1][0]][move_list[-1][1]] = None
+                # Dropping a piece means by definition that the next move cannot be a reverse of the current one
+                # We reset last_move to avoid edge case where dropping a piece into the hole makes it so the
+                # hole can't be moved
+                self.last_move = [(-1, -1)]
             else:
                 self.board[move_list[-1][0]][move_list[-1][1]].move(target_row, target_col)
                 self.board[target_row][target_col] = self.board[move_list[-1][0]][move_list[-1][1]]
