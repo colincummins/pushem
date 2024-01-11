@@ -67,7 +67,8 @@ class Board:
         self.turn, self.p1_score, self.p2_score, self.last_move, modified_spaces = state
         for row, col, piece in modified_spaces:
             self.board[row][col] = piece
-            piece.move(row, col)
+            if piece is not None:
+                piece.move(row, col)
 
     def set_selected(self, pos) -> None:
         """
