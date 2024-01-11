@@ -91,7 +91,10 @@ class Automa:
                         current_min = score
                     self.board.restore_state(state)
 
-        return score, best_move
+        if maxplayer:
+            return current_max, best_move
+
+        return current_min, None
 
     def find_move(self):
         return self.minmax(PLY, True)
