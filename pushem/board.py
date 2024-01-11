@@ -235,13 +235,13 @@ class Board:
         piece.move(-1, -1)
         if piece.get_color() == P2_COLOR:
             self.p1_score += 1
-            drop_position = 3 + self.p1_score
+            # drop_position = 3 + self.p1_score
         else:
             self.p2_score += 1
-            drop_position = self.p2_score
+            # drop_position = self.p2_score
 
-        dropped = ScoreMarker(piece.get_color(), drop_position)
-        self.dropped_pieces.append(dropped)
+        # dropped = ScoreMarker(piece.get_color(), drop_position)
+        # self.dropped_pieces.append(dropped)
 
     def get_winner(self):
         """

@@ -99,7 +99,7 @@ class Game:
 
                 board.draw_grid(self.WIN)
                 board.draw_pieces(self.WIN)
-                board.draw_score(self.WIN)
+                # board.draw_score(self.WIN)
 
                 if self.mode != "play":
                     self.mode.draw(self.WIN)

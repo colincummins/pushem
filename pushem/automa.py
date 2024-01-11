@@ -1,7 +1,7 @@
 from constants import P1_COLOR, P2_COLOR, HOLE_COLOR, ROWS, COLS
 from itertools import product
 
-PLY = 3
+PLY = 4
 
 
 class Automa:
