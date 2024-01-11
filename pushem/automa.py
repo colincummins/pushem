@@ -20,39 +20,39 @@ class Automa:
             curr_score -= 1
         return curr_score
 
-    def calculate_score(self) -> int:
+    def calculate_score(self) -> float | int:
         """
         Calculates the score based on board position and remaining pieces
         :return: Total score. Positive if p1 has advantage, negative if p2 does
         """
         # Victory means infinite score
         if self.board.p2_score == 2:
-            return float("-inf")
+            return float("inf")
 
         if self.board.p1_score == 2:
-            return float("inf")
+            return float("-inf")
 
         score = 0
 
         if self.board.p1_score == 1:
-            score += 10
-
-        if self.board.p2_score == 1:
             score -= 10
 
+        if self.board.p2_score == 1:
+            score += 10
+
         for piece in self.board.p1_pieces:
-            score += self.calculate_piece_score(piece)
+            score -= self.calculate_piece_score(piece)
 
         for piece in self.board.p2_pieces:
-            score -= self.calculate_piece_score(piece)
+            score += self.calculate_piece_score(piece)
 
         # Being next to the Hole is an added vulnerability
         for neighbor in ((-1, 0), (1, 0), (0, -1), (0, 1)):
             row, col = self.board.hole_piece.row + neighbor[0], self.board.hole_piece.col + neighbor[1]
             if self.board.board[row][col] and self.board.board[row][col].color == P1_COLOR:
-                score -= 1
-            if self.board.board[row][col] and self.board.board[row][col].color == P2_COLOR:
                 score += 1
+            if self.board.board[row][col] and self.board.board[row][col].color == P2_COLOR:
+                score -= 1
 
         return score
 
@@ -66,9 +66,9 @@ class Automa:
         move_candidates = []
 
         if maxplayer:
-            pieces = self.board.p1_pieces
-        else:
             pieces = self.board.p2_pieces
+        else:
+            pieces = self.board.p1_pieces
         pieces = pieces + [self.board.hole_piece]
 
         for piece in pieces:
