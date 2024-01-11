@@ -27,10 +27,21 @@ class Board:
         # Populate grid with starting pieces
         self.square = pygame.Rect(0, 0, SQUARE_SIZE - SQUARE_PAD, SQUARE_SIZE - SQUARE_PAD)
         self.board = [[None] * COLS for j in range(ROWS)]
+
+        # Keep track of each player's pieces for faster iteration during score calculation
+        self.p1_pieces = []
+        self.p2_pieces = []
+
         for col in range(1, COLS - 1):
-            self.board[1][col] = PlayerPiece(P2_COLOR, 1, col)
             self.board[ROWS - 2][col] = PlayerPiece(P1_COLOR, ROWS - 2, col)
-            self.board[3][3] = HolePiece(HOLE_COLOR, 3, 3)
+            self.board[1][col] = PlayerPiece(P2_COLOR, 1, col)
+            # Keep pieces for faster iteration during scoring
+            self.p1_pieces.append(self.board[ROWS - 2][col])
+            self.p2_pieces.append(self.board[1][col])
+
+        self.board[3][3] = HolePiece(HOLE_COLOR, 3, 3)
+        self.hole_piece = self.board[3][3]
+
     def __str__(self):
         color_dict = {None:"0", P1_COLOR:"1", P2_COLOR:"2", HOLE_COLOR:"X"}
         return "\n".join(["".join([color_dict[piece.color] if piece else "0" for piece in row]) for row in self.board])
