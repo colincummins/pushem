@@ -28,7 +28,8 @@ class Game:
     def set_start_new_game(self, newgame):
         self.start_new_game = newgame
 
-    def get_row_col(self, pos: (int, int)) -> (int, int):
+    @staticmethod
+    def get_row_col(pos: (int, int)) -> (int, int):
         """
         Get grid row and column from mouse position
         :param pos: mouse pos from pygame
