@@ -89,6 +89,7 @@ class Game:
                             board.set_selected(position)
                         elif board.selected_piece is not None:
                             board.take_turn(board.selected_piece[0], board.selected_piece[1], position[0], position[1])
+                            print(automa.calculate_score())
 
                 board.draw_grid(self.WIN)
                 board.draw_pieces(self.WIN)

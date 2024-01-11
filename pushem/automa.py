@@ -9,7 +9,7 @@ class Automa:
     @staticmethod
     def calculate_piece_score(piece) -> int:
         # Central squares are worth 2, 1 less for each side on edge of board (making corner squares 0)
-        if piece.row is None:
+        if piece.row == -1:
             return 0
         curr_score = 2
         if piece.row == 1 or piece.row == 5:
@@ -47,9 +47,9 @@ class Automa:
         # Being next to the Hole is an added vulnerability
         for neighbor in ((-1, 0), (1, 0), (0, -1), (0, 1)):
             row, col = self.board.hole_piece.row + neighbor[0], self.board.hole_piece.col + neighbor[1]
-            if self.board[row][col] and self.board[row][col].color == P1_COLOR:
+            if self.board.board[row][col] and self.board.board[row][col].color == P1_COLOR:
                 score -= 1
-            if self.board[row][col] and self.board[row][col].color == P2_COLOR:
+            if self.board.board[row][col] and self.board.board[row][col].color == P2_COLOR:
                 score += 1
 
         return score
