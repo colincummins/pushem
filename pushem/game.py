@@ -80,8 +80,9 @@ class Game:
                     self.mode = announce_winner
 
                 if board.get_turn_player() == P2_COLOR and self.mode == "play":
-                    move = automa.find_move()
-                    print(move)
+                    _, move = automa.find_move()
+                    print("Automa move:", move)
+                    board.take_turn(*move, True)
 
                 events = pygame.event.get()
                 for event in events:
