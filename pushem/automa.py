@@ -89,7 +89,6 @@ class Automa:
                         best_move = (start_row, start_col, target_row, target_col)
                     elif not maxplayer and score <= current_min:
                         current_min = score
-                        best_move = (start_row, start_col, target_row, target_col)
                     self.board.restore_state(state)
 
         return score, best_move
