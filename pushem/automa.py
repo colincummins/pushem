@@ -1,6 +1,8 @@
 from constants import P1_COLOR, P2_COLOR, HOLE_COLOR, ROWS, COLS
 from itertools import product
 
+PLY = 3
+
 
 class Automa:
     def __init__(self, board):
@@ -53,3 +55,44 @@ class Automa:
                 score += 1
 
         return score
+
+    def minmax(self, depth, maxplayer):
+        if depth == 0 or self.board.p1_score == 2 or self.board.p2_score == 2:
+            return self.calculate_score(), None
+
+        best_move = None
+        current_max = float("-inf")
+        current_min = float("inf")
+        move_candidates = []
+
+        if maxplayer:
+            pieces = self.board.p1_pieces
+        else:
+            pieces = self.board.p2_pieces
+        pieces = pieces + [self.board.hole_piece]
+
+        for piece in pieces:
+            if piece.row == -1:
+                continue
+            for neighbor in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+                row, col = piece.row + neighbor[0], piece.col + neighbor[1]
+                move_candidates.append((piece.row, piece.col, row, col))
+
+        for start_row, start_col, target_row, target_col in move_candidates:
+            move = self.board.try_move(start_row, start_col, target_row, target_col)
+            if move:
+                state = self.board.save_state(move)
+                self.board.move_pieces(move)
+                score, _ = self.minmax(depth - 1, not maxplayer)
+                if maxplayer and score >= current_max:
+                    current_max = score
+                    best_move = move
+                elif not maxplayer and score <= current_min:
+                    current_min = score
+                    best_move = move
+                self.board.restore_state(state)
+
+        return score, best_move
+
+    def find_move(self):
+        return self.minmax(PLY, True)

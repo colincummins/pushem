@@ -79,6 +79,10 @@ class Game:
                     announce_winner.add.button('Play Again', self.set_start_new_game, True)
                     self.mode = announce_winner
 
+                if board.get_turn_player() == P2_COLOR and self.mode == "play":
+                    move = automa.find_move()
+                    print(move)
+
                 events = pygame.event.get()
                 for event in events:
                     if event.type == pygame.MOUSEBUTTONDOWN and self.mode == "play":

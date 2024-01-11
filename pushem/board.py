@@ -156,6 +156,9 @@ class Board:
         """
         return piece.color == self.turn or piece.color == HOLE_COLOR
 
+    def get_turn_player(self):
+        return self.turn
+
     def try_move(self, current_row: int, current_col: int, target_row: int, target_col: int, pieces_moved=None):
         """
         Try to move piece from current to target.
