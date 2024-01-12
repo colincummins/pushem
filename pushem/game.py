@@ -80,6 +80,14 @@ class Game:
 
                 if board.get_turn_player() == P2_COLOR and self.mode == "play":
                     _, move = automa.find_move()
+                    moving_piece = board.get_piece((move[0], move[1]))
+                    moving_piece.toggle_selected()
+                    moving_piece.draw(self.WIN)
+                    pygame.display.update()
+                    pygame.time.wait(1000)
+                    moving_piece.toggle_selected()
+                    moving_piece.draw(self.WIN)
+                    pygame.display.update()
                     board.take_turn(*move, False)
 
                 events = pygame.event.get()
