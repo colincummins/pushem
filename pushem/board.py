@@ -19,7 +19,6 @@ class Board:
         self.turn = P1_COLOR if first_player == 0 else P2_COLOR
 
         # Track victory conditions
-        self.dropped_pieces = []
         self.p1_score = 0
         self.p2_score = 0
 
@@ -41,6 +40,15 @@ class Board:
 
         self.board[3][3] = HolePiece(HOLE_COLOR, 3, 3)
         self.hole_piece = self.board[3][3]
+
+        # Markers for scoring
+        self.score_markers = []
+        self.score_markers.append(ScoreMarker(P1_COLOR, 1))
+        self.score_markers.append(ScoreMarker(P1_COLOR, 2))
+        self.score_markers.append(ScoreMarker(P2_COLOR, 4))
+        self.score_markers.append(ScoreMarker(P2_COLOR, 5))
+
+
 
     def __str__(self):
         color_dict = {None:"0", P1_COLOR:"1", P2_COLOR:"2", HOLE_COLOR:"X"}
@@ -137,7 +145,7 @@ class Board:
         :param win: Target surface
         :return:
         """
-        for piece in self.dropped_pieces:
+        for piece in self.score_markers:
             piece.draw(win)
 
     @staticmethod
@@ -225,23 +233,16 @@ class Board:
 
     def drop_piece(self, piece: Piece) -> None:
         """
-        Drop a piece, update player victory conditions, set winner as needed
+        Drop a piece, update player scores
         :param piece: Piece to drop
         :return: None
         """
 
-        # We need to update the score, but also figure out where to add the new score marker based on which player
-        # score just got updated and whether it's the first or second point for that player
         piece.move(-1, -1)
         if piece.get_color() == P2_COLOR:
             self.p1_score += 1
-            # drop_position = 3 + self.p1_score
         else:
             self.p2_score += 1
-            # drop_position = self.p2_score
-
-        # dropped = ScoreMarker(piece.get_color(), drop_position)
-        # self.dropped_pieces.append(dropped)
 
     def get_winner(self):
         """
@@ -255,6 +256,19 @@ class Board:
             return P2_COLOR
 
         return None
+
+    def update_score_markers(self):
+        """
+        Updates the score markers to reflect current scores
+        """
+        if self.p1_score == 1:
+            self.score_markers[2].activate()
+        if self.p1_score == 2:
+            self.score_markers[3].activate()
+        if self.p2_score == 1:
+            self.score_markers[0].activate()
+        if self.p2_score == 2:
+            self.score_markers[1].activate()
 
     def move_pieces(self, move_list: list((int, int))) -> None:
         """
@@ -304,7 +318,10 @@ class Board:
         # This will be a valid move. Now actually move the pieces, record as the last move, and change turn player
         self.last_move = moved[:]
         self.move_pieces(moved)
+
+        # Update score markers if this is real move and not AI projection
+        hypothetical or self.update_score_markers()
+
         self.turn = P2_COLOR if self.turn == P1_COLOR else P1_COLOR
-        print(f"Winner {self.get_winner()}")
 
         return True
