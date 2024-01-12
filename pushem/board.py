@@ -303,7 +303,7 @@ class Board:
         :return: (bool) True if turn was successfully taken, False if move was invalid and turn not taken
         """
         # Regardless of turn outcome we deselect the piece so whoever is moving next has a clean slate
-        hypothetical or self.set_selected(self.selected_piece)
+        self.selected_piece and self.set_selected(self.selected_piece)
 
         print(f"Attempting turn {current_row},{current_col} to {target_row},{target_col}")
 
