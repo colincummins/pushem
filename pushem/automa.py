@@ -84,6 +84,8 @@ class Automa:
                 if move:
                     state = self.board.save_state(move)
                     if self.board.take_turn(start_row, start_col, target_row, target_col, True):
+                        if not best_move:
+                            best_move = (start_row, start_col, target_row, target_col)
                         score, _ = self.minmax(depth - 1, not maxplayer, alpha, beta)
                         self.board.restore_state(state)
                         if score > current_max:
