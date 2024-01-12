@@ -78,23 +78,32 @@ class Automa:
                 row, col = piece.row + neighbor[0], piece.col + neighbor[1]
                 move_candidates.append((piece.row, piece.col, row, col))
 
-        for start_row, start_col, target_row, target_col in move_candidates:
-            move = self.board.try_move(start_row, start_col,target_row, target_col)
-            if move:
-                state = self.board.save_state(move)
-                if self.board.take_turn(start_row, start_col, target_row, target_col, True):
-                    score, _ = self.minmax(depth - 1, not maxplayer)
-                    if maxplayer and score >= current_max:
-                        current_max = score
-                        best_move = (start_row, start_col, target_row, target_col)
-                    elif not maxplayer and score <= current_min:
-                        current_min = score
-                    self.board.restore_state(state)
-
         if maxplayer:
+            for start_row, start_col, target_row, target_col in move_candidates:
+                move = self.board.try_move(start_row, start_col,target_row, target_col)
+                if move:
+                    state = self.board.save_state(move)
+                    if self.board.take_turn(start_row, start_col, target_row, target_col, True):
+                        score, _ = self.minmax(depth - 1, not maxplayer)
+                        if score >= current_max:
+                            current_max = score
+                            best_move = (start_row, start_col, target_row, target_col)
+                        self.board.restore_state(state)
             return current_max, best_move
 
-        return current_min, None
+
+        else:
+            for start_row, start_col, target_row, target_col in move_candidates:
+                move = self.board.try_move(start_row, start_col, target_row, target_col)
+                if move:
+                    state = self.board.save_state(move)
+                    if self.board.take_turn(start_row, start_col, target_row, target_col, True):
+                        score, _ = self.minmax(depth - 1, not maxplayer)
+                        if score <= current_min:
+                            current_min = score
+                            best_move = (start_row, start_col, target_row, target_col)
+                        self.board.restore_state(state)
+            return current_min, None
 
     def find_move(self):
         return self.minmax(PLY, True)
