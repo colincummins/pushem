@@ -1,6 +1,6 @@
 from pushem.constants import P1_COLOR, P2_COLOR, HOLE_COLOR, ROWS, COLS
 
-PLY = 4
+PLY = 3
 
 
 class Automa:
@@ -55,14 +55,15 @@ class Automa:
 
         return score
 
-    def minmax(self, depth, maxplayer, alpha = float("-inf"), beta = float("inf")):
+    def minmax(self, depth: int, maxplayer: bool, alpha: float = float("-inf"), beta: float = float("inf")):
         if depth == 0 or self.board.p1_score == 2 or self.board.p2_score == 2:
-            return self.calculate_score(), None
+            return self.calculate_score(), None, depth
 
         best_move = None
         current_max = float("-inf")
         current_min = float("inf")
         move_candidates = []
+        best_depth = float("-inf")
 
         if maxplayer:
             pieces = self.board.p2_pieces
@@ -85,15 +86,16 @@ class Automa:
                     if self.board.take_turn(start_row, start_col, target_row, target_col, True):
                         if not best_move:
                             best_move = (start_row, start_col, target_row, target_col)
-                        score, _ = self.minmax(depth - 1, not maxplayer, alpha, beta)
+                        score, _, path_depth = self.minmax(depth - 1, not maxplayer, alpha, beta)
                         self.board.restore_state(state)
-                        if score > current_max:
+                        if (score, path_depth) > (current_max, best_depth):
                             current_max = score
-                            alpha = max(score, alpha)
+                            best_depth = path_depth
                             best_move = (start_row, start_col, target_row, target_col)
+                            alpha = max(score, alpha)
                             if score >= beta:
                                 break
-            return current_max, best_move
+            return current_max, best_move, depth
 
 
         else:
@@ -102,14 +104,15 @@ class Automa:
                 if move:
                     state = self.board.save_state(move)
                     if self.board.take_turn(start_row, start_col, target_row, target_col, True):
-                        score, _ = self.minmax(depth - 1, not maxplayer, alpha, beta)
+                        score, _, path_depth = self.minmax(depth - 1, not maxplayer, alpha, beta)
                         self.board.restore_state(state)
-                        if score < current_min:
+                        if (score, path_depth) < (current_min, -best_depth):
                             current_min = score
+                            best_depth = path_depth
                             beta = min(score, beta)
                             if score <= alpha:
                                 break
-            return current_min, None
+            return current_min, None, depth
 
     def find_move(self):
         return self.minmax(PLY, True)

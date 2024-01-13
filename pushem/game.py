@@ -79,7 +79,7 @@ class Game:
                     self.mode = announce_winner
 
                 if board.get_turn_player() == P2_COLOR and self.mode == "play":
-                    _, move = automa.find_move()
+                    _, move, _ = automa.find_move()
                     moving_piece = board.get_piece((move[0], move[1]))
                     moving_piece.toggle_selected()
                     moving_piece.draw(self.WIN)
