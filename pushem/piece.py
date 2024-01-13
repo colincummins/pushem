@@ -1,5 +1,5 @@
 import pygame
-from .constants import SQUARE_SIZE, HOLE_COLOR, BLACK, BLUE
+from pushem.constants import SQUARE_SIZE, HOLE_COLOR, BLACK, BLUE
 
 PLAYER_SIZE = 70
 HOLE_SIZE = 90

@@ -1,5 +1,4 @@
-from constants import P1_COLOR, P2_COLOR, HOLE_COLOR, ROWS, COLS
-from itertools import product
+from pushem.constants import P1_COLOR, P2_COLOR, HOLE_COLOR, ROWS, COLS
 
 PLY = 4
 

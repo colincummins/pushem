@@ -3,7 +3,7 @@ import pygame_menu
 from pushem.constants import WIDTH, HEIGHT, SQUARE_SIZE, P1_COLOR, P2_COLOR
 from pushem.board import Board
 from random import randint
-from automa import Automa
+from pushem.automa import Automa
 
 
 class Game:
@@ -111,8 +111,3 @@ class Game:
                     self.mode.update(events)
 
                 pygame.display.update()
-
-
-if __name__ == "__main__":
-    mygame = Game()
-    mygame.run_game()
