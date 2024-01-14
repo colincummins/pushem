@@ -117,6 +117,9 @@ class Game:
                         events = pygame.event.get()
                         for event in events:
                             if event.type == pygame.MOUSEBUTTONDOWN:
+                                pygame.event.wait(pygame.MOUSEBUTTONUP)
+                                pygame.time.wait(250)
+                                pygame.event.clear()
                                 self.start_new_game = True
                                 self.mode = None
 
