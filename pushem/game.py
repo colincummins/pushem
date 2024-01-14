@@ -1,6 +1,6 @@
 import pygame
 import pygame_menu
-from pushem.constants import WIDTH, HEIGHT, SQUARE_SIZE, P1_COLOR, P2_COLOR
+from pushem.constants import WIDTH, HEIGHT, SQUARE_SIZE, P1_COLOR, P2_COLOR, BLUE
 from pushem.board import Board
 from random import randint
 from pushem.automa import Automa
@@ -54,7 +54,8 @@ class Game:
             board = Board(first_player)
             automa = Automa(board)
 
-            announce_first = pygame_menu.Menu('First Player', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE)
+            announce_first = pygame_menu.Menu('First Player', WIDTH / 2, HEIGHT / 2,
+                                              theme=pygame_menu.themes.THEME_BLUE)
             announce_first.add.label("Computer is first" if first_player else "You are first")
             announce_first.add.button('OK', self.set_mode, "play")
 
@@ -62,8 +63,7 @@ class Game:
             main_menu.add.button('Play', self.set_mode, announce_first)
             main_menu.add.button('Quit', pygame_menu.events.EXIT)
 
-            announce_winner = pygame_menu.Menu('Game Over', WIDTH / 2, HEIGHT / 2,
-                                               theme=pygame_menu.themes.THEME_BLUE)
+            font = pygame.font.Font(None, 64)
 
             self.set_mode(main_menu)
 
@@ -71,12 +71,8 @@ class Game:
             while run and not self.start_new_game:
                 clock.tick(self.FPS)
 
-                winner = board.get_winner()
-                if winner and self.mode != announce_winner:
-                    announce_winner.add.label("You Won!" if winner == P1_COLOR else "Computer Won")
-                    announce_winner.add.button('Quit', pygame_menu.events.EXIT)
-                    announce_winner.add.button('Play Again', self.set_start_new_game, True)
-                    self.mode = announce_winner
+                if board.get_winner():
+                    self.mode = "winner"
 
                 if board.get_turn_player() == P2_COLOR and self.mode == "play":
                     _, move, _ = automa.find_move()
@@ -92,7 +88,7 @@ class Game:
 
                 events = pygame.event.get()
                 for event in events:
-                    if event.type == pygame.MOUSEBUTTONDOWN and self.mode == "play":
+                    if event.type == pygame.MOUSEBUTTONDOWN and self.mode == "play" and board.get_turn_player() == P1_COLOR:
                         position = self.get_row_col(pygame.mouse.get_pos())
                         selected = board.get_piece(position)
                         if board.selected_piece is None and selected is not None and board.is_turn(selected):
@@ -102,11 +98,26 @@ class Game:
                         elif board.selected_piece is not None:
                             board.take_turn(board.selected_piece[0], board.selected_piece[1], position[0], position[1])
 
+                if self.mode == "winner":
+                    winner_name = "You" if board.get_winner() == P1_COLOR else "CPU Player"
+                    text = font.render(winner_name + " won!", True, BLUE)
+                    textRect = text.get_rect()
+                    textRect.center = WIDTH // 2, HEIGHT // 2
+                    self.WIN.blit(text, textRect)
+                    pygame.display.update()
+                    while self.mode == "winner":
+                        events = pygame.event.get()
+                        for event in events:
+                            if event.type == pygame.MOUSEBUTTONDOWN:
+                                self.start_new_game = True
+                                self.mode = None
+
+
                 board.draw_grid(self.WIN)
                 board.draw_pieces(self.WIN)
                 board.draw_score(self.WIN)
 
-                if self.mode != "play":
+                if self.mode in [main_menu, announce_first]:
                     self.mode.draw(self.WIN)
                     self.mode.update(events)
 
