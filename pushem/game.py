@@ -100,7 +100,7 @@ class Game:
 
                 if self.mode == "winner":
                     winner_name = "You" if board.get_winner() == P1_COLOR else "CPU Player"
-                    text = font.render(winner_name + " won!", True, BLUE)
+                    text = font.render(winner_name + " Won!", True, BLUE)
                     textRect = text.get_rect()
                     textRect.center = WIDTH // 2, HEIGHT // 2
                     self.WIN.blit(text, textRect)
