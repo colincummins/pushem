@@ -95,7 +95,7 @@ class Automa:
                             alpha = max(score, alpha)
                             if score >= beta:
                                 break
-            return current_max, best_move, depth
+            return current_max, best_move, best_depth
 
 
         else:
@@ -112,7 +112,7 @@ class Automa:
                             beta = min(score, beta)
                             if score <= alpha:
                                 break
-            return current_min, None, depth
+            return current_min, None, best_depth
 
     def find_move(self):
         return self.minmax(PLY, True)

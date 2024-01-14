@@ -1,6 +1,6 @@
 import pygame
 import pygame_menu
-from pushem.constants import WIDTH, HEIGHT, SQUARE_SIZE, P1_COLOR, P2_COLOR, BLUE
+from pushem.constants import WIDTH, HEIGHT, SQUARE_SIZE, P1_COLOR, P2_COLOR, BLUE, WHITE
 from pushem.board import Board
 from random import randint
 from pushem.automa import Automa
@@ -63,7 +63,6 @@ class Game:
             main_menu.add.button('Play', self.set_mode, announce_first)
             main_menu.add.button('Quit', pygame_menu.events.EXIT)
 
-            font = pygame.font.Font(None, 64)
 
             self.set_mode(main_menu)
 
@@ -100,10 +99,21 @@ class Game:
 
                 if self.mode == "winner":
                     winner_name = "You" if board.get_winner() == P1_COLOR else "CPU Player"
-                    text = font.render(winner_name + " Won!", True, BLUE)
+                    winner_name += " Won!"
+                    font = pygame.font.Font(None, 64)
+                    subtitle_font = pygame.font.Font(None, 32)
+                    text = font.render(winner_name, True, BLUE)
+                    subtext = subtitle_font.render('--Click to Continue--', True, BLUE)
                     textRect = text.get_rect()
-                    textRect.center = WIDTH // 2, HEIGHT // 2
-                    self.WIN.blit(text, textRect)
+                    subtextRect = subtext.get_rect()
+                    subtextRect.midtop = textRect.midbottom
+                    allTextRect = pygame.Rect.union(textRect,subtextRect)
+                    allTextSurf = pygame.Surface((allTextRect.width, allTextRect.height))
+                    allTextSurf.fill(WHITE)
+                    allTextSurf.blit(text, textRect)
+                    allTextSurf.blit(subtext, subtextRect)
+                    allTextRect.center = WIDTH // 2, HEIGHT // 2
+                    self.WIN.blit(allTextSurf, allTextRect)
                     pygame.display.update()
                     while self.mode == "winner":
                         events = pygame.event.get()
