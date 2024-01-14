@@ -128,5 +128,3 @@ class Game:
                     self.mode.update(events)
 
                 pygame.display.update()
-
-        return 0
