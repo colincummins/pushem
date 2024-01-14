@@ -66,21 +66,6 @@ class Game:
             while run and not self.start_new_game:
                 clock.tick(self.FPS)
 
-                if self.mode == "announce_first":
-                    board.draw_grid(self.WIN)
-                    board.draw_pieces(self.WIN)
-                    pygame.display.update()
-                    message = "You go first" if board.get_turn_player() == P1_COLOR else "CPU goes first"
-                    show_announcement(message, self.WIN)
-                    while self.mode == "announce_first":
-                        events = pygame.event.get()
-                        for event in events:
-                            if event.type == pygame.MOUSEBUTTONDOWN:
-                                self.mode = "play"
-                    board.draw_grid(self.WIN)
-                    board.draw_pieces(self.WIN)
-                    pygame.display.update()
-                    continue
 
                 if board.get_winner():
                     self.mode = "winner"
@@ -108,6 +93,18 @@ class Game:
                             board.set_selected(position)
                         elif board.selected_piece is not None:
                             board.take_turn(board.selected_piece[0], board.selected_piece[1], position[0], position[1])
+
+                if self.mode == "announce_first":
+                    board.draw_grid(self.WIN)
+                    board.draw_pieces(self.WIN)
+                    pygame.display.update()
+                    message = "You go first" if board.get_turn_player() == P1_COLOR else "CPU goes first"
+                    show_announcement(message, self.WIN)
+                    while self.mode == "announce_first":
+                        events = pygame.event.get()
+                        for event in events:
+                            if event.type == pygame.MOUSEBUTTONDOWN:
+                                self.mode = "play"
 
                 if self.mode == "winner":
                     winner_message = ("You" if board.get_winner() == P1_COLOR else "CPU") + " Won!"
