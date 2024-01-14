@@ -1,9 +1,12 @@
+from ctypes import Union
+
 import pygame
 import pygame_menu
-from pushem.constants import WIDTH, HEIGHT, SQUARE_SIZE, P1_COLOR, P2_COLOR, BLUE, WHITE
+from pushem.constants import WIDTH, HEIGHT, SQUARE_SIZE, P1_COLOR, P2_COLOR
 from pushem.board import Board
 from random import randint
 from pushem.automa import Automa
+from pushem.announcement import show_announcement
 
 
 class Game:
@@ -20,7 +23,7 @@ class Game:
         return self.mode
 
     def set_mode(self, mode):
-        self.mode = mode
+        self.mode: Union[str, pygame_menu.Menu, None] = mode
 
     def get_start_new_game(self):
         return self.start_new_game
@@ -60,15 +63,30 @@ class Game:
             announce_first.add.button('OK', self.set_mode, "play")
 
             main_menu = pygame_menu.Menu('PushEm', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE)
-            main_menu.add.button('Play', self.set_mode, announce_first)
+            main_menu.add.button('Play', self.set_mode, "announce_first")
             main_menu.add.button('Quit', pygame_menu.events.EXIT)
-
 
             self.set_mode(main_menu)
 
             """Main logic/rendering loop"""
             while run and not self.start_new_game:
                 clock.tick(self.FPS)
+
+                if self.mode == "announce_first":
+                    board.draw_grid(self.WIN)
+                    board.draw_pieces(self.WIN)
+                    pygame.display.update()
+                    message = "You go first" if board.get_turn_player() == P1_COLOR else "CPU goes first"
+                    show_announcement(message, self.WIN)
+                    while self.mode == "announce_first":
+                        events = pygame.event.get()
+                        for event in events:
+                            if event.type == pygame.MOUSEBUTTONDOWN:
+                                self.mode = "play"
+                    board.draw_grid(self.WIN)
+                    board.draw_pieces(self.WIN)
+                    pygame.display.update()
+                    continue
 
                 if board.get_winner():
                     self.mode = "winner"
@@ -98,23 +116,8 @@ class Game:
                             board.take_turn(board.selected_piece[0], board.selected_piece[1], position[0], position[1])
 
                 if self.mode == "winner":
-                    winner_name = "You" if board.get_winner() == P1_COLOR else "CPU Player"
-                    winner_name += " Won!"
-                    font = pygame.font.Font(None, 64)
-                    subtitle_font = pygame.font.Font(None, 32)
-                    text = font.render(winner_name, True, BLUE)
-                    subtext = subtitle_font.render('--Click to Continue--', True, BLUE)
-                    textRect = text.get_rect()
-                    subtextRect = subtext.get_rect()
-                    subtextRect.midtop = textRect.midbottom
-                    allTextRect = pygame.Rect.union(textRect,subtextRect)
-                    allTextSurf = pygame.Surface((allTextRect.width, allTextRect.height))
-                    allTextSurf.fill(WHITE)
-                    allTextSurf.blit(text, textRect)
-                    allTextSurf.blit(subtext, subtextRect)
-                    allTextRect.center = WIDTH // 2, HEIGHT // 2
-                    self.WIN.blit(allTextSurf, allTextRect)
-                    pygame.display.update()
+                    winner_message = ("You" if board.get_winner() == P1_COLOR else "CPU") + " Won!"
+                    show_announcement(winner_message, self.WIN)
                     while self.mode == "winner":
                         events = pygame.event.get()
                         for event in events:
@@ -122,13 +125,14 @@ class Game:
                                 self.start_new_game = True
                                 self.mode = None
 
-
                 board.draw_grid(self.WIN)
                 board.draw_pieces(self.WIN)
                 board.draw_score(self.WIN)
 
-                if self.mode in [main_menu, announce_first]:
+                if self.mode == main_menu:
                     self.mode.draw(self.WIN)
                     self.mode.update(events)
 
                 pygame.display.update()
+
+        return 0
