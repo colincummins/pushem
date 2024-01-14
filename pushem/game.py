@@ -16,8 +16,6 @@ class Game:
         self.WIN = pygame.display.set_mode((WIDTH, HEIGHT))
         self.FPS = 60
         pygame.display.set_caption("PushEm")
-        self.mode = "main_menu"
-        self.start_new_game = False
 
     def get_mode(self):
         return self.mode
@@ -47,7 +45,8 @@ class Game:
         """
         while True:
             # We have to re-run game setup when we start a new game
-            self.__init__()
+            self.mode = "main_menu"
+            self.start_new_game = False
 
             # randomly determine starting player
             first_player = randint(0, 1)
