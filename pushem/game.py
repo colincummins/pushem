@@ -57,11 +57,6 @@ class Game:
             board = Board(first_player)
             automa = Automa(board)
 
-            announce_first = pygame_menu.Menu('First Player', WIDTH / 2, HEIGHT / 2,
-                                              theme=pygame_menu.themes.THEME_BLUE)
-            announce_first.add.label("Computer is first" if first_player else "You are first")
-            announce_first.add.button('OK', self.set_mode, "play")
-
             main_menu = pygame_menu.Menu('PushEm', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE)
             main_menu.add.button('Play', self.set_mode, "announce_first")
             main_menu.add.button('Quit', pygame_menu.events.EXIT)
