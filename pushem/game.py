@@ -78,7 +78,7 @@ class Game:
                     self.mode = "winner"
 
                 if board.get_turn_player() == P2_COLOR and self.mode == "play":
-                    _, move, _ = automa.find_move(self.difficulty)
+                    _, move = automa.find_move(self.difficulty)
                     moving_piece = board.get_piece((move[0], move[1]))
                     moving_piece.toggle_selected()
                     moving_piece.draw(self.WIN)
