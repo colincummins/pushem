@@ -1,4 +1,5 @@
 from pushem.constants import P1_COLOR, P2_COLOR, HOLE_COLOR, ROWS, COLS
+import random
 
 class Automa:
     def __init__(self, board):
@@ -56,7 +57,7 @@ class Automa:
         if depth == 0 or self.board.p1_score == 2 or self.board.p2_score == 2:
             return self.calculate_score(), None
 
-        best_move = None
+        best_moves = []
         current_max = float("-inf")
         current_min = float("inf")
         move_candidates = []
@@ -81,17 +82,20 @@ class Automa:
                 if move:
                     state = self.board.save_state(move)
                     if self.board.take_turn(start_row, start_col, target_row, target_col, True):
-                        if not best_move:
-                            best_move = (start_row, start_col, target_row, target_col)
+                        if not best_moves:
+                            best_moves = [(start_row, start_col, target_row, target_col)]
                         score, _ = self.minmax(depth - 1, not maxplayer, alpha, beta)
                         self.board.restore_state(state)
+                        if score == current_max:
+                            best_moves.append((start_row, start_col, target_row, target_col))
                         if score > current_max:
                             current_max = score
-                            best_move = (start_row, start_col, target_row, target_col)
+                            best_moves = [(start_row, start_col, target_row, target_col)]
                             alpha = max(score, alpha)
                             if score >= beta:
                                 break
-            return current_max, best_move
+
+            return current_max, random.choice(best_moves)
 
 
         else:
