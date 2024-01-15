@@ -73,7 +73,8 @@ class Automa:
                 continue
             for neighbor in ((-1, 0), (1, 0), (0, -1), (0, 1)):
                 row, col = piece.row + neighbor[0], piece.col + neighbor[1]
-                move_candidates.append((piece.row, piece.col, row, col))
+                if not (self.board.is_out_of_bounds(row, col) or self.board.board[row][col] == self.board.hole_piece):
+                    move_candidates.append((piece.row, piece.col, row, col))
 
         if maxplayer:
             for start_row, start_col, target_row, target_col in move_candidates:
