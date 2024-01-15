@@ -16,7 +16,7 @@ class Game:
         self.WIN = pygame.display.set_mode((WIDTH, HEIGHT))
         self.FPS = 60
         pygame.display.set_caption("PushEm")
-        self.difficulty = 1
+        self.difficulty = 2
 
     def get_mode(self):
         return self.mode
@@ -63,7 +63,7 @@ class Game:
 
             main_menu = pygame_menu.Menu('PushEm', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE)
             main_menu.add.button('Play', self.set_mode, "announce_first")
-            main_menu.add.selector('Difficulty: ', [("Easy", 1), ("Hard", 3), ("Medium", 2)],
+            main_menu.add.selector('Difficulty: ', [("Easy", 2), ("Hard", 4), ("Medium", 3)],
                                    onchange=self.set_difficulty)
             main_menu.add.button('Quit', pygame_menu.events.EXIT)
 
