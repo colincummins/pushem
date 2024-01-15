@@ -16,6 +16,7 @@ class Game:
         self.WIN = pygame.display.set_mode((WIDTH, HEIGHT))
         self.FPS = 60
         pygame.display.set_caption("PushEm")
+        self.difficulty = 2
 
     def get_mode(self):
         return self.mode
@@ -38,6 +39,10 @@ class Game:
         """
         return pos[1] // SQUARE_SIZE, pos[0] // SQUARE_SIZE
 
+    def set_difficulty(self, difficulty_str: str, difficulty_num: int)-> None:
+        self.difficulty = difficulty_num
+        print(f"Difficulty {self.difficulty}")
+
     def run_game(self):
         """
         sets up new game, provides user input to same.
@@ -58,6 +63,8 @@ class Game:
 
             main_menu = pygame_menu.Menu('PushEm', WIDTH / 2, HEIGHT / 2, theme=pygame_menu.themes.THEME_BLUE)
             main_menu.add.button('Play', self.set_mode, "announce_first")
+            main_menu.add.selector('Difficulty: ', [("Easy", 1), ("Medium", 2), ("Hard", 3)],
+                                   onchange=self.set_difficulty)
             main_menu.add.button('Quit', pygame_menu.events.EXIT)
 
             self.set_mode(main_menu)
@@ -71,7 +78,7 @@ class Game:
                     self.mode = "winner"
 
                 if board.get_turn_player() == P2_COLOR and self.mode == "play":
-                    _, move, _ = automa.find_move()
+                    _, move, _ = automa.find_move(self.difficulty)
                     moving_piece = board.get_piece((move[0], move[1]))
                     moving_piece.toggle_selected()
                     moving_piece.draw(self.WIN)

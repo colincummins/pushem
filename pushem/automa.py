@@ -1,8 +1,5 @@
 from pushem.constants import P1_COLOR, P2_COLOR, HOLE_COLOR, ROWS, COLS
 
-PLY = 3
-
-
 class Automa:
     def __init__(self, board):
         self.board = board
@@ -114,5 +111,5 @@ class Automa:
                                 break
             return current_min, None, best_depth
 
-    def find_move(self):
-        return self.minmax(PLY, True)
+    def find_move(self, difficulty):
+        return self.minmax(difficulty, True)
