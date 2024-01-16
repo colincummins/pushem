@@ -52,6 +52,20 @@ class Automa:
 
         return score
 
+    def eliminates_own_piece(self, move):
+        """
+        Determines if a move will eliminate one of the player's own pieces.
+        Args:
+            move: The squares affected by the move List[Tuple[int]]
+
+        Returns: True if move eliminates the player's own piece, false if not
+        """
+        player_color = self.board.get_turn_player()
+        if self.board.get_piece(move[0]).color == player_color and (self.board.is_out_of_bounds(*move[-1]) or (self.board.get_piece(move[-1]) and self.board.get_piece(move[-1]).color == HOLE_COLOR)):
+            return True
+
+        return False
+
     def minmax(self, depth: int, maxplayer: bool, alpha: float = float("-inf"), beta: float = float("inf")):
         if depth == 0 or self.board.p1_score == 2 or self.board.p2_score == 2:
             return self.calculate_score(), None
@@ -72,17 +86,16 @@ class Automa:
                 continue
             for neighbor in ((-1, 0), (1, 0), (0, -1), (0, 1)):
                 row, col = piece.row + neighbor[0], piece.col + neighbor[1]
-                if not (self.board.is_out_of_bounds(row, col) or self.board.board[row][col] == self.board.hole_piece):
-                    move_candidates.append((piece.row, piece.col, row, col))
+                move = self.board.try_move(piece.row, piece.col, row, col)
+                if move and not self.eliminates_own_piece(move):
+                    move_candidates.append(move)
 
-        if maxplayer:
-            for start_row, start_col, target_row, target_col in move_candidates:
-                move = self.board.try_move(start_row, start_col,target_row, target_col)
-                if move:
+            if maxplayer:
+                for move in move_candidates:
                     state = self.board.save_state(move)
+                    start_row, start_col = move[0]
+                    target_row, target_col = move[1]
                     if self.board.take_turn(start_row, start_col, target_row, target_col, True):
-                        if not best_move:
-                            best_move = (start_row, start_col, target_row, target_col)
                         score, _ = self.minmax(depth - 1, not maxplayer, alpha, beta)
                         self.board.restore_state(state)
                         if score > current_max:
@@ -91,14 +104,13 @@ class Automa:
                             alpha = max(score, alpha)
                             if score >= beta:
                                 break
-            return current_max, best_move
+                return current_max, best_move
 
-
-        else:
-            for start_row, start_col, target_row, target_col in move_candidates:
-                move = self.board.try_move(start_row, start_col, target_row, target_col)
-                if move:
+            else:
+                for move in move_candidates:
                     state = self.board.save_state(move)
+                    start_row, start_col = move[0]
+                    target_row, target_col = move[1]
                     if self.board.take_turn(start_row, start_col, target_row, target_col, True):
                         score, _ = self.minmax(depth - 1, not maxplayer, alpha, beta)
                         self.board.restore_state(state)
@@ -107,7 +119,7 @@ class Automa:
                             beta = min(score, beta)
                             if score <= alpha:
                                 break
-            return current_min, None
+                return current_min, None
 
     def find_move(self, difficulty):
         return self.minmax(difficulty, True)
