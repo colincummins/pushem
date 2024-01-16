@@ -16,17 +16,17 @@ class Automa:
             curr_score -= 1
         return curr_score
 
-    def calculate_score(self) -> float | int:
+    def calculate_score(self, depth) -> float | int:
         """
         Calculates the score based on board position and remaining pieces
         :return: Total score. Positive if p1 has advantage, negative if p2 does
         """
-        # Victory means infinite score
+        # Victories outweigh other possible scores, but earlier victories are better
         if self.board.p2_score == 2:
-            return float("inf")
+            return 100 + depth
 
         if self.board.p1_score == 2:
-            return float("-inf")
+            return -100 - depth
 
         score = 0
 
@@ -54,7 +54,7 @@ class Automa:
 
     def minmax(self, depth: int, maxplayer: bool, alpha: float = float("-inf"), beta: float = float("inf")):
         if depth == 0 or self.board.p1_score == 2 or self.board.p2_score == 2:
-            return self.calculate_score(), None
+            return self.calculate_score(depth), None
 
         best_move = None
         current_max = float("-inf")
