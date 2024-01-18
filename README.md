@@ -34,7 +34,9 @@ The first player to push two of their opponent's pieces off the board or into th
 * You may not make a move that restores the board to the same position as your last turn.
 
 ## Roadmap
-* Further improvements on AI, such as choosing the shortest path to victory when presented with multiple good moves
+* Further improvements on AI, such as:
+** ~~Choosing the shortest path to victory when presented with multiple winning moves~~ Done!
+** When multiple moves are equally good, choose one at random (rather than the first found)
 * Dynamic display of valid/invalid moves
 * Sounds and animation
 * Online player-vs-player
