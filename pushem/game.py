@@ -10,6 +10,13 @@ from pushem.how_to_play import HOW_TO_PLAY_SECTIONS
 from pushem.menu_ui import MenuUI
 from pushem.piece import PLAYER_SIZE, PIECE_BORDER
 
+CPU_THINKING_DELAY_MS = 450
+CPU_PREVIEW_DELAY_MS = 350
+CPU_STATUS_PADDING = (18, 10)
+CPU_STATUS_BOTTOM_MARGIN = 24
+CPU_STATUS_BG = (244, 233, 211)
+CPU_STATUS_BORDER = (92, 60, 38)
+
 
 class Game:
 
@@ -22,6 +29,7 @@ class Game:
         self.mode: Optional[str] = None
         self.start_new_game = False
         self.capture_animation = None
+        self.cpu_turn_state = None
         self.menu_ui = MenuUI(HOW_TO_PLAY_SECTIONS)
 
     def get_mode(self):
@@ -113,6 +121,63 @@ class Game:
         pygame.draw.rect(self.WIN, self.capture_animation["bg_color"], outer_rect)
         pygame.draw.rect(self.WIN, self.capture_animation["color"], inner_rect)
 
+    def reset_cpu_turn_state(self) -> None:
+        self.cpu_turn_state = None
+
+    def begin_cpu_turn(self, automa: Automa) -> None:
+        _, move = automa.find_move(self.difficulty)
+        self.cpu_turn_state = {
+            "move": move,
+            "started_at": pygame.time.get_ticks(),
+            "preview_started_at": None,
+            "preview_active": False,
+        }
+
+    def update_cpu_turn(self, board: Board, automa: Automa) -> None:
+        if board.get_turn_player() != P2_COLOR or self.mode != "play" or self.capture_animation is not None:
+            return
+
+        if self.cpu_turn_state is None:
+            self.begin_cpu_turn(automa)
+            return
+
+        now = pygame.time.get_ticks()
+        move = self.cpu_turn_state["move"]
+        moving_piece = board.get_piece((move[0], move[1]))
+
+        if self.cpu_turn_state["preview_started_at"] is None:
+            if now - self.cpu_turn_state["started_at"] < CPU_THINKING_DELAY_MS:
+                return
+            moving_piece.toggle_selected()
+            self.cpu_turn_state["preview_started_at"] = now
+            self.cpu_turn_state["preview_active"] = True
+            return
+
+        if now - self.cpu_turn_state["preview_started_at"] < CPU_PREVIEW_DELAY_MS:
+            return
+
+        if self.cpu_turn_state["preview_active"]:
+            moving_piece.toggle_selected()
+
+        if board.take_turn(*move, False):
+            self.start_capture_animation(board.last_capture)
+        self.reset_cpu_turn_state()
+
+    def draw_cpu_status(self) -> None:
+        if self.cpu_turn_state is None or self.mode != "play":
+            return
+
+        font = pygame.font.Font(None, 30)
+        label = font.render("CPU thinking...", True, CPU_STATUS_BORDER)
+        label_rect = label.get_rect()
+        background_rect = label_rect.inflate(*CPU_STATUS_PADDING)
+        background_rect.midbottom = (WIDTH // 2, HEIGHT - CPU_STATUS_BOTTOM_MARGIN)
+        label_rect.center = background_rect.center
+
+        pygame.draw.rect(self.WIN, CPU_STATUS_BG, background_rect)
+        pygame.draw.rect(self.WIN, CPU_STATUS_BORDER, background_rect, width=3)
+        self.WIN.blit(label, label_rect)
+
     def handle_main_menu_event(self, event: pygame.event.Event) -> None:
         action = self.menu_ui.handle_main_menu_event(event, self.difficulty)
         self.handle_menu_action(action)
@@ -166,6 +231,7 @@ class Game:
             self.mode = "main_menu"
             self.start_new_game = False
             self.capture_animation = None
+            self.reset_cpu_turn_state()
 
             # randomly determine starting player
             first_player = randint(0, 1)
@@ -185,18 +251,7 @@ class Game:
                 if board.get_winner() and self.capture_animation is None:
                     self.mode = "winner"
 
-                if board.get_turn_player() == P2_COLOR and self.mode == "play" and self.capture_animation is None:
-                    _, move = automa.find_move(self.difficulty)
-                    moving_piece = board.get_piece((move[0], move[1]))
-                    moving_piece.toggle_selected()
-                    moving_piece.draw(self.WIN)
-                    pygame.display.update()
-                    pygame.time.wait(1000)
-                    moving_piece.toggle_selected()
-                    moving_piece.draw(self.WIN)
-                    pygame.display.update()
-                    if board.take_turn(*move, False):
-                        self.start_capture_animation(board.last_capture)
+                self.update_cpu_turn(board, automa)
 
                 events = pygame.event.get()
                 for event in events:
@@ -206,7 +261,7 @@ class Game:
                         self.handle_main_menu_event(event)
                     elif self.mode == "how_to_play":
                         self.handle_how_to_play_event(event)
-                    elif event.type == pygame.MOUSEBUTTONDOWN and self.mode == "play" and board.get_turn_player() == P1_COLOR and self.capture_animation is None:
+                    elif event.type == pygame.MOUSEBUTTONDOWN and self.mode == "play" and board.get_turn_player() == P1_COLOR and self.capture_animation is None and self.cpu_turn_state is None:
                         position = self.get_row_col(pygame.mouse.get_pos())
                         selected = board.get_piece(position)
                         if board.selected_piece is None and selected is not None and board.is_turn(selected):
@@ -240,6 +295,7 @@ class Game:
                 board.draw_pieces(self.WIN)
                 board.draw_score(self.WIN)
                 self.draw_capture_animation()
+                self.draw_cpu_status()
 
                 if self.mode == "main_menu":
                     self.menu_ui.draw_main_menu(self.WIN, self.difficulty)
