@@ -11,6 +11,7 @@ class Board:
         # For selecting a piece to move
         self.selected_piece = None
         self.target_square = None
+        self.last_capture = None
 
         # For checking if current move recreates the last board state, which is not allowed
         self.last_move = [(-1, -1)]
@@ -244,6 +245,21 @@ class Board:
         else:
             self.p2_score += 1
 
+    @staticmethod
+    def get_square_center(row: int, col: int) -> tuple[int, int]:
+        return SQUARE_SIZE // 2 + col * SQUARE_SIZE, SQUARE_SIZE // 2 + row * SQUARE_SIZE
+
+    def build_capture_event(self, piece: Piece, target_row: int, target_col: int) -> dict:
+        end_x, end_y = self.get_square_center(target_row, target_col)
+        return {
+            "start_x": piece.x,
+            "start_y": piece.y,
+            "end_x": end_x,
+            "end_y": end_y,
+            "color": piece.color,
+            "bg_color": piece.bg_color,
+        }
+
     def get_winner(self):
         """
         Return winner of game
@@ -270,7 +286,7 @@ class Board:
         if self.p2_score == 2:
             self.score_markers[1].activate()
 
-    def move_pieces(self, move_list: list((int, int))) -> None:
+    def move_pieces(self, move_list: list((int, int)), hypothetical: bool = False) -> None:
         """
         Moves pieces in the list. Last element of the list is the space all pieces are shifted towards
         Drops a piece if it goes off the edge of the board or into the hole
@@ -279,6 +295,9 @@ class Board:
         while move_list:
             if self.is_out_of_bounds(target_row, target_col) or self.board[target_row][target_col] is not None and \
                     self.board[target_row][target_col].color == HOLE_COLOR:
+                captured_piece = self.board[move_list[-1][0]][move_list[-1][1]]
+                if not hypothetical:
+                    self.last_capture = self.build_capture_event(captured_piece, target_row, target_col)
                 self.drop_piece(self.board[move_list[-1][0]][move_list[-1][1]])
                 self.board[move_list[-1][0]][move_list[-1][1]] = None
                 # Dropping a piece means by definition that the next move cannot be a reverse of the current one
@@ -317,7 +336,8 @@ class Board:
 
         # This will be a valid move. Now actually move the pieces, record as the last move, and change turn player
         self.last_move = moved[:]
-        self.move_pieces(moved)
+        self.last_capture = None
+        self.move_pieces(moved, hypothetical)
 
         # Update score markers if this is real move and not AI projection
         hypothetical or self.update_score_markers()

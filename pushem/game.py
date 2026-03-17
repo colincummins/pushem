@@ -6,6 +6,7 @@ from pushem.board import Board
 from random import randint
 from pushem.automa import Automa
 from pushem.announcement import show_announcement
+from pushem.piece import PLAYER_SIZE, PIECE_BORDER
 
 
 class Game:
@@ -21,6 +22,7 @@ class Game:
         self.menu_options = ["Play", "Difficulty", "How to Play", "Quit"]
         self.menu_index = 0
         self.difficulty_options = [("Easy", 2), ("Medium", 3), ("Hard", 4)]
+        self.capture_animation = None
         self.how_to_play_sections = [
             ("Goal", "The first player to push two of their opponent's pieces off the board or into the Hole is the winner."),
             ("Movement", "There are two types of pieces: Player pieces and the Hole."),
@@ -65,6 +67,61 @@ class Game:
         next_index = (current_index + step) % len(self.difficulty_options)
         difficulty_str, difficulty_num = self.difficulty_options[next_index]
         self.set_difficulty(difficulty_str, difficulty_num)
+
+    def start_capture_animation(self, capture_event: Optional[dict]) -> None:
+        if not capture_event:
+            return
+        self.capture_animation = {
+            **capture_event,
+            "start_time": pygame.time.get_ticks(),
+            "move_duration_ms": 160,
+            "shrink_duration_ms": 180,
+        }
+
+    def update_capture_animation(self) -> None:
+        if self.capture_animation is None:
+            return
+
+        elapsed = pygame.time.get_ticks() - self.capture_animation["start_time"]
+        total_duration = (
+            self.capture_animation["move_duration_ms"] +
+            self.capture_animation["shrink_duration_ms"]
+        )
+        if elapsed >= total_duration:
+            self.capture_animation = None
+
+    @staticmethod
+    def interpolate(start: float, end: float, progress: float) -> float:
+        return start + (end - start) * progress
+
+    def draw_capture_animation(self) -> None:
+        if self.capture_animation is None:
+            return
+
+        elapsed = pygame.time.get_ticks() - self.capture_animation["start_time"]
+        move_duration = self.capture_animation["move_duration_ms"]
+        shrink_duration = self.capture_animation["shrink_duration_ms"]
+
+        if elapsed < move_duration:
+            progress = elapsed / move_duration
+            x = self.interpolate(self.capture_animation["start_x"], self.capture_animation["end_x"], progress)
+            y = self.interpolate(self.capture_animation["start_y"], self.capture_animation["end_y"], progress)
+            scale = 1.0
+        else:
+            shrink_elapsed = min(elapsed - move_duration, shrink_duration)
+            x = self.capture_animation["end_x"]
+            y = self.capture_animation["end_y"]
+            scale = max(0.0, 1.0 - (shrink_elapsed / shrink_duration))
+
+        outer_size = max(1, round(PLAYER_SIZE * scale))
+        inner_size = max(1, round((PLAYER_SIZE - 2 * PIECE_BORDER) * scale))
+        outer_rect = pygame.Rect(0, 0, outer_size, outer_size)
+        outer_rect.center = (round(x), round(y))
+        inner_rect = pygame.Rect(0, 0, inner_size, inner_size)
+        inner_rect.center = outer_rect.center
+
+        pygame.draw.rect(self.WIN, self.capture_animation["bg_color"], outer_rect)
+        pygame.draw.rect(self.WIN, self.capture_animation["color"], inner_rect)
 
     def draw_panel(self, panel_width: int, panel_height: int) -> pygame.Rect:
         panel_rect = pygame.Rect(0, 0, panel_width, panel_height)
@@ -226,6 +283,7 @@ class Game:
             # We have to re-run game setup when we start a new game
             self.mode = "main_menu"
             self.start_new_game = False
+            self.capture_animation = None
 
             # randomly determine starting player
             first_player = randint(0, 1)
@@ -239,12 +297,13 @@ class Game:
             """Main logic/rendering loop"""
             while run and not self.start_new_game:
                 clock.tick(self.FPS)
+                self.update_capture_animation()
 
 
-                if board.get_winner():
+                if board.get_winner() and self.capture_animation is None:
                     self.mode = "winner"
 
-                if board.get_turn_player() == P2_COLOR and self.mode == "play":
+                if board.get_turn_player() == P2_COLOR and self.mode == "play" and self.capture_animation is None:
                     _, move = automa.find_move(self.difficulty)
                     moving_piece = board.get_piece((move[0], move[1]))
                     moving_piece.toggle_selected()
@@ -254,7 +313,8 @@ class Game:
                     moving_piece.toggle_selected()
                     moving_piece.draw(self.WIN)
                     pygame.display.update()
-                    board.take_turn(*move, False)
+                    if board.take_turn(*move, False):
+                        self.start_capture_animation(board.last_capture)
 
                 events = pygame.event.get()
                 for event in events:
@@ -264,7 +324,7 @@ class Game:
                         self.handle_main_menu_event(event)
                     elif self.mode == "how_to_play":
                         self.handle_how_to_play_event(event)
-                    elif event.type == pygame.MOUSEBUTTONDOWN and self.mode == "play" and board.get_turn_player() == P1_COLOR:
+                    elif event.type == pygame.MOUSEBUTTONDOWN and self.mode == "play" and board.get_turn_player() == P1_COLOR and self.capture_animation is None:
                         position = self.get_row_col(pygame.mouse.get_pos())
                         selected = board.get_piece(position)
                         if board.selected_piece is None and selected is not None and board.is_turn(selected):
@@ -272,7 +332,8 @@ class Game:
                         elif board.selected_piece is not None and board.selected_piece == position:
                             board.set_selected(position)
                         elif board.selected_piece is not None:
-                            board.take_turn(board.selected_piece[0], board.selected_piece[1], position[0], position[1])
+                            if board.take_turn(board.selected_piece[0], board.selected_piece[1], position[0], position[1]):
+                                self.start_capture_animation(board.last_capture)
 
                 if self.mode == "announce_first":
                     board.draw_grid(self.WIN)
@@ -302,6 +363,7 @@ class Game:
                 board.draw_grid(self.WIN)
                 board.draw_pieces(self.WIN)
                 board.draw_score(self.WIN)
+                self.draw_capture_animation()
 
                 if self.mode == "main_menu":
                     self.draw_main_menu()
