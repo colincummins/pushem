@@ -16,6 +16,25 @@ This program is for demonstration purposes only.
 3. In the `pushem` directory, run the command `pip install -r requirements.txt` to install the necessary libraries
 4. Run the game with `python play_game.py`
 
+## Packaging
+### Desktop Build
+To create a desktop build with PyInstaller, run:
+
+```bash
+./build_desktop.sh
+```
+
+The packaged app will be written to `dist/`.
+
+### Web Build
+To create a browser build with pygbag, run:
+
+```bash
+./build_web.sh
+```
+
+The browser build will be written to `build/web/`.
+
 <!-- how-to-play:start -->
 ## How to Play
 ### Goal
