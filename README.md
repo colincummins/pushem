@@ -28,17 +28,6 @@ The script creates and reuses a local virtual environment at `.build-venv/`, so 
 
 The packaged app will be written to `dist/`.
 
-### Web Build
-To create a browser build with pygbag, run:
-
-```bash
-./build_web.sh
-```
-
-This script also uses the local `.build-venv/` environment instead of the system Python packages.
-
-The browser build will be written to `build/web/`.
-
 <!-- how-to-play:start -->
 ## How to Play
 ### Goal
@@ -60,7 +49,6 @@ The browser build will be written to `build/web/`.
 <!-- how-to-play:end -->
 
 ## Roadmap
-* ~~Further improvements on AI, such as choosing the shortest path to victory when presented with multiple winning moves~~ Done!
 * When multiple moves are equally good, choose one at random (rather than the first found)
 * Dynamic display of valid/invalid moves
 * Sounds and animation
