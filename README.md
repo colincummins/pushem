@@ -3,7 +3,7 @@
 ## Introduction
 PushEm is a Python implementation of the board game Ostle.
 
-Board rendering is handled by pygame, the main menu by pygame_menu.
+Board rendering and the main menu are both handled by pygame.
 
 The AI player uses a minimax algorithm to choose moves, with alpha-beta pruning to speed up the decision process.
 
