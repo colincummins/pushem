@@ -8,6 +8,36 @@ from pushem.automa import Automa
 from pushem.announcement import show_announcement
 from pushem.piece import PLAYER_SIZE, PIECE_BORDER
 
+MENU_PANEL_SIZE = (420, 410)
+HOW_TO_PLAY_PANEL_SIZE = (590, 560)
+PANEL_SHADOW_INFLATE = 24
+PANEL_SHADOW_OFFSET = (-12, 10)
+PANEL_BORDER_WIDTH = 5
+PANEL_INNER_BORDER_INSET = 18
+PANEL_INNER_BORDER_WIDTH = 2
+MENU_TITLE_CENTER_Y = 72
+MENU_ITEM_START_Y = 136
+MENU_ITEM_SPACING_Y = 64
+MENU_BUTTON_PADDING = (88, 26)
+HOW_TO_PLAY_TITLE_CENTER_Y = 44
+HOW_TO_PLAY_START_Y = 82
+HOW_TO_PLAY_BODY_WIDTH_MARGIN = 76
+HOW_TO_PLAY_HEADING_INDENT = 34
+HOW_TO_PLAY_BODY_INDENT = 44
+HOW_TO_PLAY_HEADING_SPACING = 24
+HOW_TO_PLAY_LINE_HEIGHT = 19
+HOW_TO_PLAY_LINE_SPACING = 4
+HOW_TO_PLAY_SECTION_SPACING = 5
+HOW_TO_PLAY_FOOTER_BOTTOM_OFFSET = 24
+PANEL_COLOR = (244, 233, 211)
+PANEL_BORDER_COLOR = (92, 60, 38)
+PANEL_INNER_BORDER_COLOR = (255, 248, 236)
+PANEL_SHADOW_COLOR = (25, 18, 12, 70)
+MENU_BUTTON_ACTIVE_TEXT = (255, 248, 236)
+MENU_BUTTON_INACTIVE_TEXT = (92, 60, 38)
+MENU_BUTTON_ACTIVE_BG = (148, 87, 52)
+MENU_BUTTON_INACTIVE_BG = (236, 220, 192)
+
 
 class Game:
 
@@ -127,43 +157,55 @@ class Game:
         panel_rect = pygame.Rect(0, 0, panel_width, panel_height)
         panel_rect.center = (WIDTH // 2, HEIGHT // 2)
 
-        shadow_surface = pygame.Surface((panel_rect.width + 24, panel_rect.height + 24), pygame.SRCALPHA)
-        pygame.draw.rect(shadow_surface, (25, 18, 12, 70), shadow_surface.get_rect())
-        self.WIN.blit(shadow_surface, (panel_rect.x - 12, panel_rect.y + 10))
+        shadow_surface = pygame.Surface(
+            (panel_rect.width + PANEL_SHADOW_INFLATE, panel_rect.height + PANEL_SHADOW_INFLATE),
+            pygame.SRCALPHA,
+        )
+        pygame.draw.rect(shadow_surface, PANEL_SHADOW_COLOR, shadow_surface.get_rect())
+        self.WIN.blit(
+            shadow_surface,
+            (panel_rect.x + PANEL_SHADOW_OFFSET[0], panel_rect.y + PANEL_SHADOW_OFFSET[1]),
+        )
 
         panel_surface = pygame.Surface((panel_rect.width, panel_rect.height))
-        panel_surface.fill((244, 233, 211))
+        panel_surface.fill(PANEL_COLOR)
         self.WIN.blit(panel_surface, panel_rect.topleft)
-        pygame.draw.rect(self.WIN, (92, 60, 38), panel_rect, width=5)
-        pygame.draw.rect(self.WIN, (255, 248, 236), panel_rect.inflate(-18, -18), width=2)
+        pygame.draw.rect(self.WIN, PANEL_BORDER_COLOR, panel_rect, width=PANEL_BORDER_WIDTH)
+        pygame.draw.rect(
+            self.WIN,
+            PANEL_INNER_BORDER_COLOR,
+            panel_rect.inflate(-PANEL_INNER_BORDER_INSET, -PANEL_INNER_BORDER_INSET),
+            width=PANEL_INNER_BORDER_WIDTH,
+        )
         return panel_rect
 
     def draw_main_menu(self) -> None:
         title_font = pygame.font.Font(None, 92)
         item_font = pygame.font.Font(None, 50)
 
-        panel_width = 420
-        panel_height = 410
+        panel_width, panel_height = MENU_PANEL_SIZE
         panel_rect = self.draw_panel(panel_width, panel_height)
 
-        title = title_font.render("PushEm", True, (92, 60, 38))
-        title_rect = title.get_rect(center=(WIDTH // 2, panel_rect.y + 72))
+        title = title_font.render("PushEm", True, PANEL_BORDER_COLOR)
+        title_rect = title.get_rect(center=(WIDTH // 2, panel_rect.y + MENU_TITLE_CENTER_Y))
         self.WIN.blit(title, title_rect)
 
         hovered_index = self.get_hovered_menu_index(pygame.mouse.get_pos())
         for index, option in enumerate(self.menu_options):
             is_selected = index == self.menu_index or index == hovered_index
-            text_color = (255, 248, 236) if is_selected else (92, 60, 38)
-            background_color = (148, 87, 52) if is_selected else (236, 220, 192)
-            border_color = (92, 60, 38)
+            text_color = MENU_BUTTON_ACTIVE_TEXT if is_selected else MENU_BUTTON_INACTIVE_TEXT
+            background_color = MENU_BUTTON_ACTIVE_BG if is_selected else MENU_BUTTON_INACTIVE_BG
+            border_color = PANEL_BORDER_COLOR
 
             label = option
             if option == "Difficulty":
                 label = f"{option}: {self.get_difficulty_name()}"
 
             text = item_font.render(label, True, text_color)
-            text_rect = text.get_rect(center=(WIDTH // 2, panel_rect.y + 136 + index * 64))
-            button_rect = text_rect.inflate(88, 26)
+            text_rect = text.get_rect(
+                center=(WIDTH // 2, panel_rect.y + MENU_ITEM_START_Y + index * MENU_ITEM_SPACING_Y)
+            )
+            button_rect = text_rect.inflate(*MENU_BUTTON_PADDING)
 
             pygame.draw.rect(self.WIN, background_color, button_rect)
             pygame.draw.rect(self.WIN, border_color, button_rect, width=4)
@@ -190,35 +232,34 @@ class Game:
         body_font = pygame.font.Font(None, 24)
         footer_font = pygame.font.Font(None, 24)
 
-        panel_rect = self.draw_panel(590, 560)
+        panel_rect = self.draw_panel(*HOW_TO_PLAY_PANEL_SIZE)
 
-        title = title_font.render("How to Play", True, (92, 60, 38))
-        title_rect = title.get_rect(center=(WIDTH // 2, panel_rect.y + 44))
+        title = title_font.render("How to Play", True, PANEL_BORDER_COLOR)
+        title_rect = title.get_rect(center=(WIDTH // 2, panel_rect.y + HOW_TO_PLAY_TITLE_CENTER_Y))
         self.WIN.blit(title, title_rect)
 
-        current_y = panel_rect.y + 82
-        line_spacing = 4
-        body_width = panel_rect.width - 76
+        current_y = panel_rect.y + HOW_TO_PLAY_START_Y
+        body_width = panel_rect.width - HOW_TO_PLAY_BODY_WIDTH_MARGIN
         previous_heading = None
 
         for heading, body in self.how_to_play_sections:
             if heading != previous_heading:
-                heading_surface = heading_font.render(heading, True, (92, 60, 38))
-                heading_rect = heading_surface.get_rect(topleft=(panel_rect.x + 34, current_y))
+                heading_surface = heading_font.render(heading, True, PANEL_BORDER_COLOR)
+                heading_rect = heading_surface.get_rect(topleft=(panel_rect.x + HOW_TO_PLAY_HEADING_INDENT, current_y))
                 self.WIN.blit(heading_surface, heading_rect)
-                current_y += 24
+                current_y += HOW_TO_PLAY_HEADING_SPACING
                 previous_heading = heading
 
             wrapped_lines = self.wrap_text(f"- {body}", body_font, body_width)
             for line in wrapped_lines:
                 body_surface = body_font.render(line, True, BLACK)
-                body_rect = body_surface.get_rect(topleft=(panel_rect.x + 44, current_y))
+                body_rect = body_surface.get_rect(topleft=(panel_rect.x + HOW_TO_PLAY_BODY_INDENT, current_y))
                 self.WIN.blit(body_surface, body_rect)
-                current_y += 19 + line_spacing
-            current_y += 5
+                current_y += HOW_TO_PLAY_LINE_HEIGHT + HOW_TO_PLAY_LINE_SPACING
+            current_y += HOW_TO_PLAY_SECTION_SPACING
 
-        footer = footer_font.render("Press Esc, Enter, or click to return.", True, (92, 60, 38))
-        footer_rect = footer.get_rect(center=(WIDTH // 2, panel_rect.bottom - 24))
+        footer = footer_font.render("Press Esc, Enter, or click to return.", True, PANEL_BORDER_COLOR)
+        footer_rect = footer.get_rect(center=(WIDTH // 2, panel_rect.bottom - HOW_TO_PLAY_FOOTER_BOTTOM_OFFSET))
         self.WIN.blit(footer, footer_rect)
 
     def get_difficulty_name(self) -> str:
@@ -238,10 +279,10 @@ class Game:
         if label == "Difficulty":
             label = f"{label}: {self.get_difficulty_name()}"
         text = item_font.render(label, True, WHITE)
-        panel_rect = pygame.Rect(0, 0, 420, 410)
+        panel_rect = pygame.Rect(0, 0, *MENU_PANEL_SIZE)
         panel_rect.center = (WIDTH // 2, HEIGHT // 2)
-        text_rect = text.get_rect(center=(WIDTH // 2, panel_rect.y + 136 + index * 64))
-        return text_rect.inflate(88, 26)
+        text_rect = text.get_rect(center=(WIDTH // 2, panel_rect.y + MENU_ITEM_START_Y + index * MENU_ITEM_SPACING_Y))
+        return text_rect.inflate(*MENU_BUTTON_PADDING)
 
     def handle_main_menu_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYDOWN:
