@@ -24,6 +24,8 @@ To create a desktop build with PyInstaller, run:
 ./build_desktop.sh
 ```
 
+The script creates and reuses a local virtual environment at `.build-venv/`, so it works on systems that block system-wide `pip install`.
+
 The packaged app will be written to `dist/`.
 
 ### Web Build
@@ -32,6 +34,8 @@ To create a browser build with pygbag, run:
 ```bash
 ./build_web.sh
 ```
+
+This script also uses the local `.build-venv/` environment instead of the system Python packages.
 
 The browser build will be written to `build/web/`.
 
