@@ -150,8 +150,9 @@ class Game:
         title_rect = title.get_rect(center=(WIDTH // 2, panel_rect.y + 72))
         self.WIN.blit(title, title_rect)
 
+        hovered_index = self.get_hovered_menu_index(pygame.mouse.get_pos())
         for index, option in enumerate(self.menu_options):
-            is_selected = index == self.menu_index
+            is_selected = index == self.menu_index or index == hovered_index
             text_color = (255, 248, 236) if is_selected else (92, 60, 38)
             background_color = (148, 87, 52) if is_selected else (236, 220, 192)
             border_color = (92, 60, 38)
@@ -225,6 +226,12 @@ class Game:
             name for name, value in self.difficulty_options if value == self.difficulty
         )
 
+    def get_hovered_menu_index(self, mouse_pos: tuple[int, int]) -> Optional[int]:
+        for index in range(len(self.menu_options)):
+            if self.get_menu_button_rect(index).collidepoint(mouse_pos):
+                return index
+        return None
+
     def get_menu_button_rect(self, index: int) -> pygame.Rect:
         item_font = pygame.font.Font(None, 54)
         label = self.menu_options[index]
@@ -238,7 +245,9 @@ class Game:
 
     def handle_main_menu_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
+            if event.key == pygame.K_ESCAPE:
+                raise SystemExit
+            elif event.key == pygame.K_UP:
                 self.menu_index = (self.menu_index - 1) % len(self.menu_options)
             elif event.key == pygame.K_DOWN:
                 self.menu_index = (self.menu_index + 1) % len(self.menu_options)
@@ -249,20 +258,44 @@ class Game:
             elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
                 self.activate_menu_option(self.menu_options[self.menu_index])
 
+        if event.type == pygame.MOUSEMOTION:
+            hovered_index = self.get_hovered_menu_index(event.pos)
+            if hovered_index is not None:
+                self.menu_index = hovered_index
+
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
-            for index, option in enumerate(self.menu_options):
-                button_rect = self.get_menu_button_rect(index)
-                if button_rect.collidepoint(mouse_pos):
-                    self.menu_index = index
-                    self.activate_menu_option(option)
-                    break
+            hovered_index = self.get_hovered_menu_index(mouse_pos)
+            if hovered_index is not None:
+                self.menu_index = hovered_index
+                self.activate_menu_option(self.menu_options[hovered_index])
 
     def handle_how_to_play_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_RETURN, pygame.K_SPACE):
             self.set_mode("main_menu")
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.set_mode("main_menu")
+
+    def handle_announce_first_event(self, event: pygame.event.Event) -> None:
+        if event.type == pygame.QUIT:
+            raise SystemExit
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            self.set_mode("main_menu")
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.set_mode("play")
+
+    def handle_winner_event(self, event: pygame.event.Event) -> None:
+        if event.type == pygame.QUIT:
+            raise SystemExit
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            self.start_new_game = True
+            self.mode = None
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pygame.event.wait(pygame.MOUSEBUTTONUP)
+            pygame.time.wait(250)
+            pygame.event.clear()
+            self.start_new_game = True
+            self.mode = None
 
     def activate_menu_option(self, option: str) -> None:
         if option == "Play":
@@ -344,8 +377,7 @@ class Game:
                     while self.mode == "announce_first":
                         events = pygame.event.get()
                         for event in events:
-                            if event.type == pygame.MOUSEBUTTONDOWN:
-                                self.mode = "play"
+                            self.handle_announce_first_event(event)
 
                 if self.mode == "winner":
                     winner_message = ("You" if board.get_winner() == P1_COLOR else "CPU") + " Won!"
@@ -353,12 +385,7 @@ class Game:
                     while self.mode == "winner":
                         events = pygame.event.get()
                         for event in events:
-                            if event.type == pygame.MOUSEBUTTONDOWN:
-                                pygame.event.wait(pygame.MOUSEBUTTONUP)
-                                pygame.time.wait(250)
-                                pygame.event.clear()
-                                self.start_new_game = True
-                                self.mode = None
+                            self.handle_winner_event(event)
 
                 board.draw_grid(self.WIN)
                 board.draw_pieces(self.WIN)
