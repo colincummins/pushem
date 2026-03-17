@@ -29,6 +29,7 @@ PANEL_COLOR = (244, 233, 211)
 PANEL_BORDER_COLOR = (92, 60, 38)
 PANEL_INNER_BORDER_COLOR = (255, 248, 236)
 PANEL_SHADOW_COLOR = (25, 18, 12, 70)
+PANEL_BACKDROP_COLOR = (20, 14, 10, 110)
 MENU_BUTTON_ACTIVE_TEXT = (255, 248, 236)
 MENU_BUTTON_INACTIVE_TEXT = (92, 60, 38)
 MENU_BUTTON_ACTIVE_BG = (148, 87, 52)
@@ -70,6 +71,10 @@ class MenuUI:
     def draw_panel(self, win: pygame.Surface, panel_width: int, panel_height: int) -> pygame.Rect:
         panel_rect = pygame.Rect(0, 0, panel_width, panel_height)
         panel_rect.center = (WIDTH // 2, HEIGHT // 2)
+
+        backdrop_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        backdrop_surface.fill(PANEL_BACKDROP_COLOR)
+        win.blit(backdrop_surface, (0, 0))
 
         shadow_surface = pygame.Surface(
             (panel_rect.width + PANEL_SHADOW_INFLATE, panel_rect.height + PANEL_SHADOW_INFLATE),
