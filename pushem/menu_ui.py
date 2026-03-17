@@ -36,7 +36,7 @@ MENU_BUTTON_INACTIVE_BG = (236, 220, 192)
 
 
 class MenuUI:
-    def __init__(self, how_to_play_sections: list[tuple[str, str]]):
+    def __init__(self, how_to_play_sections: list[tuple[str, list[str]]]):
         self.menu_options = ["Play", "Difficulty", "How to Play", "Quit"]
         self.menu_index = 0
         self.difficulty_options = [("Easy", 2), ("Medium", 3), ("Hard", 4)]
@@ -152,23 +152,20 @@ class MenuUI:
 
         current_y = panel_rect.y + HOW_TO_PLAY_START_Y
         body_width = panel_rect.width - HOW_TO_PLAY_BODY_WIDTH_MARGIN
-        previous_heading = None
+        for heading, bullets in self.how_to_play_sections:
+            heading_surface = heading_font.render(heading, True, PANEL_BORDER_COLOR)
+            heading_rect = heading_surface.get_rect(topleft=(panel_rect.x + HOW_TO_PLAY_HEADING_INDENT, current_y))
+            win.blit(heading_surface, heading_rect)
+            current_y += HOW_TO_PLAY_HEADING_SPACING
 
-        for heading, body in self.how_to_play_sections:
-            if heading != previous_heading:
-                heading_surface = heading_font.render(heading, True, PANEL_BORDER_COLOR)
-                heading_rect = heading_surface.get_rect(topleft=(panel_rect.x + HOW_TO_PLAY_HEADING_INDENT, current_y))
-                win.blit(heading_surface, heading_rect)
-                current_y += HOW_TO_PLAY_HEADING_SPACING
-                previous_heading = heading
-
-            wrapped_lines = self.wrap_text(f"- {body}", body_font, body_width)
-            for line in wrapped_lines:
-                body_surface = body_font.render(line, True, BLACK)
-                body_rect = body_surface.get_rect(topleft=(panel_rect.x + HOW_TO_PLAY_BODY_INDENT, current_y))
-                win.blit(body_surface, body_rect)
-                current_y += HOW_TO_PLAY_LINE_HEIGHT + HOW_TO_PLAY_LINE_SPACING
-            current_y += HOW_TO_PLAY_SECTION_SPACING
+            for bullet in bullets:
+                wrapped_lines = self.wrap_text(f"- {bullet}", body_font, body_width)
+                for line in wrapped_lines:
+                    body_surface = body_font.render(line, True, BLACK)
+                    body_rect = body_surface.get_rect(topleft=(panel_rect.x + HOW_TO_PLAY_BODY_INDENT, current_y))
+                    win.blit(body_surface, body_rect)
+                    current_y += HOW_TO_PLAY_LINE_HEIGHT + HOW_TO_PLAY_LINE_SPACING
+                current_y += HOW_TO_PLAY_SECTION_SPACING
 
         footer = footer_font.render("Press Esc, Enter, or click to return.", True, PANEL_BORDER_COLOR)
         footer_rect = footer.get_rect(center=(WIDTH // 2, panel_rect.bottom - HOW_TO_PLAY_FOOTER_BOTTOM_OFFSET))

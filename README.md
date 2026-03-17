@@ -16,9 +16,10 @@ This program is for demonstration purposes only.
 3. In the `pushem` directory, run the command `pip install -r requirements.txt` to install the necessary libraries
 4. Run the game with `python play_game.py`
 
+<!-- how-to-play:start -->
 ## How to Play
 ### Goal
-The first player to push two of their opponent's pieces off the board or into the Hole is the winner.
+* The first player to push two of their opponent's pieces off the board or into the Hole is the winner.
 
 ### Movement
 * There are two types of pieces - Player pieces and the Hole
@@ -32,6 +33,8 @@ The first player to push two of their opponent's pieces off the board or into th
 ### Forbidden Moves
 * You may not push the Hole piece on top of a Player Piece or off of the board.
 * You may not make a move that restores the board to the same position as your last turn.
+
+<!-- how-to-play:end -->
 
 ## Roadmap
 * ~~Further improvements on AI, such as choosing the shortest path to victory when presented with multiple winning moves~~ Done!

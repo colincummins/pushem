@@ -6,6 +6,7 @@ from pushem.board import Board
 from random import randint
 from pushem.automa import Automa
 from pushem.announcement import show_announcement
+from pushem.how_to_play import HOW_TO_PLAY_SECTIONS
 from pushem.menu_ui import MenuUI
 from pushem.piece import PLAYER_SIZE, PIECE_BORDER
 
@@ -21,17 +22,7 @@ class Game:
         self.mode: Optional[str] = None
         self.start_new_game = False
         self.capture_animation = None
-        self.how_to_play_sections = [
-            ("Goal", "The first player to push two of their opponent's pieces off the board or into the Hole is the winner."),
-            ("Movement", "There are two types of pieces: Player pieces and the Hole."),
-            ("Movement", "On your turn, you may move one of your player pieces, or the Hole piece, one square up, down, left, or right."),
-            ("Movement", "Moving a player piece pushes all player pieces in line with it."),
-            ("Eliminating Pieces", "If a player piece is pushed off the board or into the hole, it is eliminated."),
-            ("Eliminating Pieces", "You can eliminate your own pieces, so be careful."),
-            ("Forbidden Moves", "You may not push the Hole piece on top of a Player Piece or off of the board."),
-            ("Forbidden Moves", "You may not make a move that restores the board to the same position as your last turn."),
-        ]
-        self.menu_ui = MenuUI(self.how_to_play_sections)
+        self.menu_ui = MenuUI(HOW_TO_PLAY_SECTIONS)
 
     def get_mode(self):
         return self.mode
