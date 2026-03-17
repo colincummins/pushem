@@ -34,17 +34,24 @@ MENU_BUTTON_ACTIVE_TEXT = (255, 248, 236)
 MENU_BUTTON_INACTIVE_TEXT = (92, 60, 38)
 MENU_BUTTON_ACTIVE_BG = (148, 87, 52)
 MENU_BUTTON_INACTIVE_BG = (236, 220, 192)
+IN_GAME_PANEL_SIZE = (360, 220)
+IN_GAME_TITLE_CENTER_Y = 56
+IN_GAME_ITEM_START_Y = 118
+IN_GAME_ITEM_SPACING_Y = 58
 
 
 class MenuUI:
     def __init__(self, how_to_play_sections: list[tuple[str, list[str]]]):
         self.menu_options = ["Play", "Difficulty", "How to Play", "Quit"]
+        self.in_game_options = ["Resume", "Quit to Menu"]
         self.menu_index = 0
+        self.in_game_index = 0
         self.difficulty_options = [("Easy", 2), ("Medium", 3), ("Hard", 4)]
         self.how_to_play_sections = how_to_play_sections
 
     def reset(self) -> None:
         self.menu_index = 0
+        self.in_game_index = 0
 
     def get_difficulty_name(self, difficulty: int) -> str:
         return next(
@@ -67,6 +74,21 @@ class MenuUI:
         panel_rect.center = (WIDTH // 2, HEIGHT // 2)
         text_rect = text.get_rect(center=(WIDTH // 2, panel_rect.y + MENU_ITEM_START_Y + index * MENU_ITEM_SPACING_Y))
         return text_rect.inflate(*MENU_BUTTON_PADDING)
+
+    def get_in_game_button_rect(self, index: int) -> pygame.Rect:
+        item_font = pygame.font.Font(None, 46)
+        label = self.in_game_options[index]
+        text = item_font.render(label, True, WHITE)
+        panel_rect = pygame.Rect(0, 0, *IN_GAME_PANEL_SIZE)
+        panel_rect.center = (WIDTH // 2, HEIGHT // 2)
+        text_rect = text.get_rect(center=(WIDTH // 2, panel_rect.y + IN_GAME_ITEM_START_Y + index * IN_GAME_ITEM_SPACING_Y))
+        return text_rect.inflate(*MENU_BUTTON_PADDING)
+
+    def get_hovered_in_game_index(self, mouse_pos: tuple[int, int]) -> Optional[int]:
+        for index in range(len(self.in_game_options)):
+            if self.get_in_game_button_rect(index).collidepoint(mouse_pos):
+                return index
+        return None
 
     def draw_panel(self, win: pygame.Surface, panel_width: int, panel_height: int) -> pygame.Rect:
         panel_rect = pygame.Rect(0, 0, panel_width, panel_height)
@@ -176,6 +198,28 @@ class MenuUI:
         footer_rect = footer.get_rect(center=(WIDTH // 2, panel_rect.bottom - HOW_TO_PLAY_FOOTER_BOTTOM_OFFSET))
         win.blit(footer, footer_rect)
 
+    def draw_in_game_menu(self, win: pygame.Surface) -> None:
+        title_font = pygame.font.Font(None, 64)
+        item_font = pygame.font.Font(None, 46)
+        panel_rect = self.draw_panel(win, *IN_GAME_PANEL_SIZE)
+
+        title = title_font.render("Paused", True, PANEL_BORDER_COLOR)
+        title_rect = title.get_rect(center=(WIDTH // 2, panel_rect.y + IN_GAME_TITLE_CENTER_Y))
+        win.blit(title, title_rect)
+
+        hovered_index = self.get_hovered_in_game_index(pygame.mouse.get_pos())
+        for index, option in enumerate(self.in_game_options):
+            is_selected = index == self.in_game_index or index == hovered_index
+            text_color = MENU_BUTTON_ACTIVE_TEXT if is_selected else MENU_BUTTON_INACTIVE_TEXT
+            background_color = MENU_BUTTON_ACTIVE_BG if is_selected else MENU_BUTTON_INACTIVE_BG
+            text = item_font.render(option, True, text_color)
+            text_rect = text.get_rect(center=(WIDTH // 2, panel_rect.y + IN_GAME_ITEM_START_Y + index * IN_GAME_ITEM_SPACING_Y))
+            button_rect = text_rect.inflate(*MENU_BUTTON_PADDING)
+
+            pygame.draw.rect(win, background_color, button_rect)
+            pygame.draw.rect(win, PANEL_BORDER_COLOR, button_rect, width=4)
+            win.blit(text, text_rect)
+
     def handle_main_menu_event(self, event: pygame.event.Event, difficulty: int) -> Optional[str]:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
@@ -212,6 +256,30 @@ class MenuUI:
             return "main_menu"
         return None
 
+    def handle_in_game_menu_event(self, event: pygame.event.Event) -> Optional[str]:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                return "resume_game"
+            if event.key == pygame.K_UP:
+                self.in_game_index = (self.in_game_index - 1) % len(self.in_game_options)
+            elif event.key == pygame.K_DOWN:
+                self.in_game_index = (self.in_game_index + 1) % len(self.in_game_options)
+            elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                return self.activate_in_game_option(self.in_game_options[self.in_game_index])
+
+        if event.type == pygame.MOUSEMOTION:
+            hovered_index = self.get_hovered_in_game_index(event.pos)
+            if hovered_index is not None:
+                self.in_game_index = hovered_index
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            hovered_index = self.get_hovered_in_game_index(pygame.mouse.get_pos())
+            if hovered_index is not None:
+                self.in_game_index = hovered_index
+                return self.activate_in_game_option(self.in_game_options[hovered_index])
+
+        return None
+
     @staticmethod
     def activate_menu_option(option: str) -> str:
         if option == "Play":
@@ -221,3 +289,9 @@ class MenuUI:
         if option == "How to Play":
             return "how_to_play"
         return "quit"
+
+    @staticmethod
+    def activate_in_game_option(option: str) -> str:
+        if option == "Resume":
+            return "resume_game"
+        return "quit_to_menu"

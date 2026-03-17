@@ -1,7 +1,8 @@
 from typing import Optional
+import math
 
 import pygame
-from pushem.constants import WIDTH, HEIGHT, SQUARE_SIZE, P1_COLOR, P2_COLOR, WHITE, BLACK
+from pushem.constants import WIDTH, HEIGHT, SQUARE_SIZE, P1_COLOR, P2_COLOR, WHITE, BLACK, GRAY
 from pushem.board import Board
 from random import randint
 from pushem.automa import Automa
@@ -12,10 +13,15 @@ from pushem.piece import PLAYER_SIZE, PIECE_BORDER
 
 CPU_THINKING_DELAY_MS = 450
 CPU_PREVIEW_DELAY_MS = 350
-CPU_STATUS_PADDING = (18, 10)
 CPU_STATUS_BOTTOM_MARGIN = 24
-CPU_STATUS_BG = (244, 233, 211)
-CPU_STATUS_BORDER = (92, 60, 38)
+CPU_SPINNER_RADIUS = 18
+CPU_SPINNER_DOT_RADIUS = 4
+CPU_SPINNER_DOT_COUNT = 8
+CPU_SPINNER_STEP_MS = 90
+CPU_SPINNER_BG_RADIUS = 28
+CPU_SPINNER_BG = (244, 233, 211)
+CPU_SPINNER_BORDER = (92, 60, 38)
+CPU_SPINNER_IDLE_COLOR = GRAY
 
 
 class Game:
@@ -167,16 +173,25 @@ class Game:
         if self.cpu_turn_state is None or self.mode != "play":
             return
 
-        font = pygame.font.Font(None, 30)
-        label = font.render("CPU thinking...", True, CPU_STATUS_BORDER)
-        label_rect = label.get_rect()
-        background_rect = label_rect.inflate(*CPU_STATUS_PADDING)
-        background_rect.midbottom = (WIDTH // 2, HEIGHT - CPU_STATUS_BOTTOM_MARGIN)
-        label_rect.center = background_rect.center
+        center = (WIDTH // 2, HEIGHT - CPU_STATUS_BOTTOM_MARGIN - CPU_SPINNER_BG_RADIUS)
+        elapsed = pygame.time.get_ticks() - self.cpu_turn_state["started_at"]
+        active_index = (elapsed // CPU_SPINNER_STEP_MS) % CPU_SPINNER_DOT_COUNT
 
-        pygame.draw.rect(self.WIN, CPU_STATUS_BG, background_rect)
-        pygame.draw.rect(self.WIN, CPU_STATUS_BORDER, background_rect, width=3)
-        self.WIN.blit(label, label_rect)
+        pygame.draw.circle(self.WIN, CPU_SPINNER_BG, center, CPU_SPINNER_BG_RADIUS)
+        pygame.draw.circle(self.WIN, CPU_SPINNER_BORDER, center, CPU_SPINNER_BG_RADIUS, width=3)
+
+        for index in range(CPU_SPINNER_DOT_COUNT):
+            angle = (2 * math.pi * index / CPU_SPINNER_DOT_COUNT) - (math.pi / 2)
+            dot_x = center[0] + int(math.cos(angle) * CPU_SPINNER_RADIUS)
+            dot_y = center[1] + int(math.sin(angle) * CPU_SPINNER_RADIUS)
+            intensity_offset = (index - active_index) % CPU_SPINNER_DOT_COUNT
+            if intensity_offset == 0:
+                dot_color = P2_COLOR
+            elif intensity_offset <= 2:
+                dot_color = P1_COLOR
+            else:
+                dot_color = CPU_SPINNER_IDLE_COLOR
+            pygame.draw.circle(self.WIN, dot_color, (dot_x, dot_y), CPU_SPINNER_DOT_RADIUS)
 
     def handle_main_menu_event(self, event: pygame.event.Event) -> None:
         action = self.menu_ui.handle_main_menu_event(event, self.difficulty)
@@ -184,6 +199,10 @@ class Game:
 
     def handle_how_to_play_event(self, event: pygame.event.Event) -> None:
         action = self.menu_ui.handle_how_to_play_event(event)
+        self.handle_menu_action(action)
+
+    def handle_in_game_menu_event(self, event: pygame.event.Event) -> None:
+        action = self.menu_ui.handle_in_game_menu_event(event)
         self.handle_menu_action(action)
 
     def handle_menu_action(self, action: Optional[str]) -> None:
@@ -199,6 +218,11 @@ class Game:
             self.set_mode("how_to_play")
         elif action == "main_menu":
             self.set_mode("main_menu")
+        elif action == "resume_game":
+            self.set_mode("play")
+        elif action == "quit_to_menu":
+            self.start_new_game = True
+            self.mode = None
 
     def handle_announce_first_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.QUIT:
@@ -261,6 +285,11 @@ class Game:
                         self.handle_main_menu_event(event)
                     elif self.mode == "how_to_play":
                         self.handle_how_to_play_event(event)
+                    elif self.mode == "in_game_menu":
+                        self.handle_in_game_menu_event(event)
+                    elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and self.mode == "play":
+                        self.menu_ui.in_game_index = 0
+                        self.set_mode("in_game_menu")
                     elif event.type == pygame.MOUSEBUTTONDOWN and self.mode == "play" and board.get_turn_player() == P1_COLOR and self.capture_animation is None and self.cpu_turn_state is None:
                         position = self.get_row_col(pygame.mouse.get_pos())
                         selected = board.get_piece(position)
@@ -301,5 +330,7 @@ class Game:
                     self.menu_ui.draw_main_menu(self.WIN, self.difficulty)
                 if self.mode == "how_to_play":
                     self.menu_ui.draw_how_to_play(self.WIN)
+                if self.mode == "in_game_menu":
+                    self.menu_ui.draw_in_game_menu(self.WIN)
 
                 pygame.display.update()
